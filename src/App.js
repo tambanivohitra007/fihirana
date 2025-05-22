@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ListMusic, Download, XCircle, AlertTriangle, WifiOff, Menu, Star, Info as InfoIconLucide } from 'lucide-react'; // Renamed Info to avoid conflict
+import colors from './colors';
 
 // Import separated components
 import HymnListItem from './components/HymnListItem';
@@ -37,6 +38,10 @@ const App = () => {
     const savedMode = localStorage.getItem('darkMode');
     return savedMode ? JSON.parse(savedMode) : window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  const sidebarTitleText = useMemo(() => {
+    return isDarkMode ? colors.darkSidebarTitleText : colors.lightSidebarTitleText;
+  }, [isDarkMode]);
 
   // Favorites state
   const [favorites, setFavorites] = useState(() => {
@@ -344,18 +349,20 @@ const App = () => {
             <SearchBar
               onSearchChange={(e) => setSearchTerm(e.target.value)}
               searchTerm={searchTerm}
+              isDarkMode={isDarkMode} // Pass isDarkMode
             />
             {(activeThemeFilter || activeAuthorFilter) && (
-                <div className="mb-4 p-3 bg-sky-100 dark:bg-slate-700 rounded-lg text-sm text-sky-700 dark:text-sky-300">
+                <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: isDarkMode ? colors.darkCard : colors.lightCard, color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}>
                     Mampiseho hira {activeThemeFilter ? `mikasika ny "${activeThemeFilter}"` : ''} {activeAuthorFilter ? `nosoratan'i "${activeAuthorFilter}"` : ''}.
-                    <button onClick={() => { setActiveThemeFilter(''); setActiveAuthorFilter(''); setSearchTerm(''); }} className="ml-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-semibold">[Esory ny sivana]</button>
+                    <button onClick={() => { setActiveThemeFilter(''); setActiveAuthorFilter(''); setSearchTerm(''); }} className="ml-2 font-semibold" style={{ color: isDarkMode ? colors.darkError : colors.lightError }}>[Esory ny sivana]</button>
                 </div>
             )}
             {showInstallButton && (
               <button
                 onClick={handleInstallClick}
-                className="sm:hidden w-full flex items-center justify-center px-4 py-3 mb-4 bg-sky-500 hover:bg-sky-400 text-white rounded-lg transition-colors duration-200"
+                className="sm:hidden w-full flex items-center justify-center px-4 py-3 mb-4 rounded-lg transition-colors duration-200"
                 title="Hametraka ity fampiharana ity"
+                style={{ background: isDarkMode ? colors.darkButtonPrimaryBg : colors.buttonPrimaryBg, color: isDarkMode ? colors.darkButtonPrimaryText : colors.buttonPrimaryText }}
               >
                 <Download size={20} className="mr-2" /> Hametraka ny App
               </button>
@@ -369,13 +376,14 @@ const App = () => {
                     onSelect={handleSelectHymn}
                     isFavorite={favorites.includes(hymn.Id_)}
                     onToggleFavorite={toggleFavorite}
+                    isDarkMode={isDarkMode} // Pass isDarkMode
                   />
                 ))}
               </ul>
             ) : (
               <div className="text-center py-10">
-                <InfoIconLucide size={48} className="mx-auto text-slate-400 dark:text-slate-500 mb-4" />
-                <p className="text-xl text-slate-600 dark:text-slate-400">
+                <InfoIconLucide size={48} className="mx-auto mb-4" style={{ color: isDarkMode ? colors.darkIcon : colors.lightIcon }} />
+                <p className="text-xl" style={{ color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}>
                   {searchTerm || activeThemeFilter || activeAuthorFilter ? "Tsy nahitana hira mifanaraka amin'ny sivana." : "Tsy misy hira."}
                 </p>
               </div>
@@ -383,15 +391,15 @@ const App = () => {
           </>
         );
       case 'detail':
-        return selectedHymn && <HymnDetail hymn={selectedHymn} onBack={handleBackToList} isFavorite={favorites.includes(selectedHymn.Id_)} onToggleFavorite={toggleFavorite} />;
+        return selectedHymn && <HymnDetail hymn={selectedHymn} onBack={handleBackToList} isFavorite={favorites.includes(selectedHymn.Id_)} onToggleFavorite={toggleFavorite} isDarkMode={isDarkMode} />; // Pass isDarkMode
       case 'themes':
-        return <SelectionListPage title="Misafidy Lohahevitra" items={uniqueThemes} onSelectItem={handleThemeSelect} onBack={() => handleNavigate('list')} />;
+        return <SelectionListPage title="Misafidy Lohahevitra" items={uniqueThemes} onSelectItem={handleThemeSelect} onBack={() => handleNavigate('list')} isDarkMode={isDarkMode} />; // Pass isDarkMode
       case 'authors':
-        return <SelectionListPage title="Misafidy Mpanoratra" items={uniqueAuthors} onSelectItem={handleAuthorSelect} onBack={() => handleNavigate('list')} />;
+        return <SelectionListPage title="Misafidy Mpanoratra" items={uniqueAuthors} onSelectItem={handleAuthorSelect} onBack={() => handleNavigate('list')} isDarkMode={isDarkMode} />; // Pass isDarkMode
       case 'favorites':
         return (
-            <div className="p-4 md:p-6 bg-white dark:bg-slate-800 rounded-lg shadow-xl">
-                <h2 className="text-2xl font-bold text-sky-700 dark:text-sky-400 mb-4">Hira Ankafizina</h2>
+            <div className="p-4 md:p-6 rounded-lg shadow-xl" style={{ background: isDarkMode ? colors.darkCard : colors.lightCard, boxShadow: isDarkMode ? colors.darkCardShadow : colors.cardShadow }}>
+                <h2 className="text-2xl font-bold mb-4" style={{ color: isDarkMode ? colors.darkPrimary : colors.lightPrimary }}>Hira Ankafizina</h2>
                 {favoriteHymns.length > 0 ? (
                     <ul className="space-y-1">
                     {favoriteHymns.map(hymn => (
@@ -401,20 +409,21 @@ const App = () => {
                         onSelect={handleSelectHymn}
                         isFavorite={favorites.includes(hymn.Id_)}
                         onToggleFavorite={toggleFavorite}
+                        isDarkMode={isDarkMode} // Pass isDarkMode
                         />
                     ))}
                     </ul>
                 ) : (
                     <div className="text-center py-10">
-                        <Star size={48} className="mx-auto text-slate-400 dark:text-slate-500 mb-4" />
-                        <p className="text-xl text-slate-600 dark:text-slate-400">Tsy mbola misy hira ankafizina.</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Tsindrio ny kisary fo eo akaikin'ny hira na eo amin'ny antsipiriany mba hanampiana azy eto.</p>
+                        <Star size={48} className="mx-auto mb-4" style={{ color: isDarkMode ? colors.darkIcon : colors.lightIcon }} />
+                        <p className="text-xl" style={{ color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}>Tsy mbola misy hira ankafizina.</p>
+                        <p className="text-sm mt-2" style={{ color: isDarkMode ? colors.darkTextTertiary : colors.lightTextTertiary }}>Tsindrio ny kisary fo eo akaikin'ny hira na eo amin'ny antsipiriany mba hanampiana azy eto.</p>
                     </div>
                 )}
             </div>
         );
       case 'about':
-        return <AboutPage onBack={() => handleNavigate('list')} />;
+        return <AboutPage onBack={() => handleNavigate('list')} isDarkMode={isDarkMode} />; // Pass isDarkMode
       default:
         return <p>Pejy tsy hita.</p>;
     }
@@ -423,22 +432,23 @@ const App = () => {
   // Loading and Error States
   if (isLoading) { 
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center p-4">
-        <ListMusic className="text-sky-600 dark:text-sky-400 animate-bounce" size={64} />
-        <p className="text-xl text-slate-700 dark:text-slate-300 mt-4">Mandefa ny hira...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ background: isDarkMode ? colors.darkBg : colors.lightBg }}>
+        <ListMusic className="animate-bounce" size={64} style={{ color: isDarkMode ? colors.darkPrimary : colors.lightPrimary }} />
+        <p className="text-xl mt-4" style={{ color: isDarkMode ? colors.darkText : colors.lightText }}>Mandefa ny hira...</p>
       </div>
     );
   }
 
   if (error || !allHymns.length) { 
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
-        <XCircle className="text-red-500 dark:text-red-400" size={64} />
-        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200 mt-4 mb-2">Loza Kely!</h2>
-        <p className="text-slate-600 dark:text-slate-400 mb-6">{error || "Tsy misy hira voatahiry ao amin'ny fampiharana."}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center" style={{ background: isDarkMode ? colors.darkBg : colors.lightBg }}>
+        <XCircle size={64} style={{ color: isDarkMode ? colors.darkError : colors.lightError }} />
+        <h2 className="text-2xl font-semibold mt-4 mb-2" style={{ color: isDarkMode ? colors.darkText : colors.lightText }}>Loza Kely!</h2>
+        <p className="mb-6" style={{ color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}>{error || "Tsy misy hira voatahiry ao amin'ny fampiharana."}</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg transition-colors duration-200"
+          className="px-6 py-3 rounded-lg transition-colors duration-200"
+          style={{ background: isDarkMode ? colors.darkButtonPrimaryBg : colors.buttonPrimaryBg, color: isDarkMode ? colors.darkButtonPrimaryText : colors.buttonPrimaryText }}
         >
           Avereno Andramana
         </button>
@@ -449,7 +459,7 @@ const App = () => {
   const mainContentPaddingBottom = "pb-20"; // For bottom navigation bar
 
   return (
-    <div className={`flex min-h-screen ${isDarkMode ? 'dark' : ''} bg-slate-100 dark:bg-slate-900`}>
+    <div className={`flex min-h-screen ${isDarkMode ? 'dark' : ''}`} style={{ background: isDarkMode ? colors.darkBg : colors.lightBg, color: isDarkMode ? colors.darkText : colors.lightText }}>
       <SidebarMenu 
         isOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)}
@@ -458,23 +468,35 @@ const App = () => {
         isDarkMode={isDarkMode}
       />
       <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-64 xl:ml-72' : 'lg:ml-0'}`}>
-        <header className="bg-sky-600 dark:bg-sky-800 text-white shadow-md sticky top-0 z-30">
+        <header
+          className="border-b shadow-xl sticky top-0 z-30"
+          style={{
+            background: isDarkMode ? colors.darkGradient : colors.lightGradient,
+            color: isDarkMode ? colors.darkText : colors.lightText, // Ensure header text color contrasts with dark gradient
+            borderColor: isDarkMode ? colors.darkBorder : colors.lightBorder,
+            backdropFilter: 'blur(12px)'
+          }}
+        >
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-              className="p-2 rounded-md text-white hover:bg-sky-500 dark:hover:bg-sky-700 lg:hidden"
+              className="p-2 rounded-full text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-sky-400 transition lg:hidden shadow-md backdrop-blur-md"
+              style={{ color: isDarkMode ? colors.darkText : colors.lightText }} // Ensure menu icon color is appropriate
             >
               <Menu size={28} />
             </button>
-            <div className="flex items-center">
-              <ListMusic size={28} className="mr-3 hidden sm:block" /> 
-              <h1 className="text-xl sm:text-2xl font-bold">Fihirana FFPM</h1>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 shadow-lg ring-2 ring-sky-400">
+                <ListMusic size={28} className="text-sky-200" />
+              </span>
+              <span className="text-lg font-bold tracking-tight" style={{ color: sidebarTitleText }}>Fihirana</span>
             </div>
             {showInstallButton && (
               <button
                 onClick={handleInstallClick}
-                className="hidden sm:flex items-center px-3 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-lg transition-colors duration-200 text-sm"
+                className="hidden sm:flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors duration-200 text-sm font-semibold shadow focus:outline-none focus:ring-2 focus:ring-sky-400"
                 title="Hametraka ity fampiharana ity"
+                style={{ color: isDarkMode ? colors.darkText : colors.lightText }} // Ensure install button text color is appropriate
               >
                 <Download size={18} className="mr-2" /> Hametraka
               </button>
@@ -483,7 +505,7 @@ const App = () => {
         </header>
 
         {isOffline && (
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 dark:bg-yellow-700 dark:text-yellow-100 dark:border-yellow-300" role="alert">
+          <div className="p-4" role="alert" style={{ background: isDarkMode ? colors.darkWarningBg : colors.lightWarningBg, color: isDarkMode ? colors.darkWarningText : colors.lightWarningText, borderColor: isDarkMode ? colors.darkWarningBorder : colors.lightWarningBorder }}>
             <div className="flex items-center">
               <WifiOff size={20} className="mr-2" />
               <p className="font-bold">Tsy misy internet!</p>
@@ -499,10 +521,11 @@ const App = () => {
         <BottomNavigationBar 
             onNavigate={handleNavigate} 
             currentPage={currentPage}
+            isDarkMode={isDarkMode} // Pass isDarkMode
         />
         
-        <footer className={`bg-slate-200 dark:bg-slate-800 text-center p-4 mt-auto transition-all duration-300 ease-in-out ${isSidebarOpen && 'lg:ml-64 xl:ml-72'}`}>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+        <footer className="text-center p-4 mt-auto transition-all duration-300 ease-in-out" style={{ background: isDarkMode ? colors.darkFooterBg : colors.lightCard, color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary, borderTop: isDarkMode ? `1px solid ${colors.darkBorder}`: 'none' }}>
+          <p className="text-sm">
             Fihirana PWA &copy; {new Date().getFullYear()}. Namboarina tamim-pitiavana.
           </p>
         </footer>

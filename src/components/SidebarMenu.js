@@ -1,8 +1,28 @@
 import React from 'react';
-import { X, Home, Info as InfoIcon, Moon, Sun, Users, Star, Tag } from 'lucide-react';
+import { X, Home, ListMusic, Info as InfoIcon, Moon, Sun, Users, Star, Tag } from 'lucide-react';
+import colors from '../colors';
 
-const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode }) => {
+const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode, currentPage }) => {
   if (!isOpen && window.innerWidth < 1024) return null;
+
+  const navItems = [
+    { name: 'list', label: 'Dashboard', icon: Home },
+    { name: 'themes', label: 'Lohahevitra', icon: Tag },
+    { name: 'authors', label: 'Mpanoratra', icon: Users },
+    { name: 'favorites', label: 'Ankafizina', icon: Star },
+    { name: 'about', label: 'Momba ny App', icon: InfoIcon },
+  ];
+
+  const sidebarBg = isDarkMode ? colors.darkSidebarBg : colors.lightSidebarBg;
+  const sidebarText = isDarkMode ? colors.darkSidebarText : colors.lightSidebarText;
+  // Use lightGradient and darkGradient for active background
+  const sidebarActiveBg = isDarkMode ? colors.darkGradient : colors.lightGradient;
+  const sidebarActiveText = isDarkMode ? colors.darkSidebarActiveText : colors.lightSidebarActiveText;
+  const sidebarDivider = isDarkMode ? colors.darkSidebarDivider : colors.lightSidebarDivider;
+  const sidebarTitleText = isDarkMode ? colors.darkSidebarTitleText : colors.lightSidebarTitleText;
+  const sidebarIconColor = isDarkMode ? colors.darkSidebarText : colors.lightSidebarText; // Default icon color
+  const sidebarActiveIconColor = isDarkMode ? colors.darkSidebarActiveText : colors.lightSidebarActiveText; // Active icon color
+
 
   return (
     <>
@@ -10,49 +30,102 @@ const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode
         className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 ease-in-out lg:hidden"
         onClick={onClose}
       ></div>}
-      <div className={`fixed top-0 left-0 w-64 sm:w-72 h-full bg-gradient-to-b from-sky-600 via-sky-500 to-sky-700 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white p-6 shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:sticky lg:h-screen lg:shadow-none`}>
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-semibold">Fihirana Menu</h2>
-          <button onClick={onClose} className="lg:hidden text-sky-200 hover:text-white">
-            <X size={24} />
-          </button>
+      <aside
+        className={`fixed top-0 left-0 w-64 sm:w-72 h-full z-50 transform transition-transform duration-300 ease-in-out border-r ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:sticky lg:h-screen`}
+        style={{ background: sidebarBg, color: sidebarText, borderColor: sidebarDivider }}
+      >
+        {/* Logo/Header */}
+        <div className="flex items-center gap-3 px-6 py-6 mb-2">
+          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 shadow-lg ring-2 ring-sky-400">
+                <ListMusic size={28} className="text-sky-200" />
+          </span>
+          <span className="text-lg font-bold tracking-tight" style={{ color: sidebarTitleText }}>Fihirana</span>
         </div>
-        <nav>
-          <ul>
-            <li className="mb-3">
-              <button onClick={() => onNavigate('list')} className="flex items-center w-full text-left px-3 py-2.5 rounded-md hover:bg-sky-600 dark:hover:bg-sky-800 transition-colors">
-                <Home size={20} className="mr-3" /> Hira Rehetra
+        <div className="px-6 mb-2">
+          <span className="text-xs uppercase tracking-wider" style={{ color: sidebarText, letterSpacing: 1 }}>Navigation</span>
+        </div>
+        <ul className="mb-4">
+          {navItems.map(item => (
+            <li key={item.name} className="px-2">
+              <button
+                onClick={() => onNavigate(item.name)}
+                className="flex items-center w-full text-left px-4 py-2.5 rounded-lg transition-colors duration-150"
+                style={{
+                  background: currentPage === item.name ? sidebarActiveBg : 'transparent',
+                  color: currentPage === item.name ? sidebarActiveText : sidebarText,
+                  fontWeight: 400
+                }}
+                onMouseOver={e => {
+                  if (currentPage !== item.name) {
+                    e.currentTarget.style.background = sidebarActiveBg;
+                    if (!isDarkMode) {
+                      e.currentTarget.style.color = '#fff'; // White text on hover in light mode
+                      // Also change icon color on hover in light mode
+                      const icon = e.currentTarget.querySelector('svg');
+                      if (icon) icon.style.color = '#fff';
+                    }
+                  }
+                }}
+                onMouseOut={e => {
+                  if (currentPage !== item.name) {
+                    e.currentTarget.style.background = 'transparent';
+                    if (!isDarkMode) {
+                      e.currentTarget.style.color = sidebarText;
+                      // Revert icon color on mouse out in light mode
+                      const icon = e.currentTarget.querySelector('svg');
+                      if (icon) icon.style.color = sidebarIconColor;
+                    }
+                  }
+                }}
+              >
+                <item.icon size={20} className="mr-3" style={{ color: currentPage === item.name ? sidebarActiveIconColor : sidebarIconColor }} />
+                <span>{item.label}</span>
               </button>
             </li>
-            <li className="mb-3">
-              <button onClick={() => onNavigate('themes')} className="flex items-center w-full text-left px-3 py-2.5 rounded-md hover:bg-sky-600 dark:hover:bg-sky-800 transition-colors">
-                <Tag size={20} className="mr-3" /> Lohahevitra
-              </button>
-            </li>
-            <li className="mb-3">
-              <button onClick={() => onNavigate('authors')} className="flex items-center w-full text-left px-3 py-2.5 rounded-md hover:bg-sky-600 dark:hover:bg-sky-800 transition-colors">
-                <Users size={20} className="mr-3" /> Mpanoratra
-              </button>
-            </li>
-            <li className="mb-3">
-              <button onClick={() => onNavigate('favorites')} className="flex items-center w-full text-left px-3 py-2.5 rounded-md hover:bg-sky-600 dark:hover:bg-sky-800 transition-colors">
-                <Star size={20} className="mr-3" /> Ankafizina
-              </button>
-            </li>
-            <li className="mb-3">
-              <button onClick={() => onNavigate('about')} className="flex items-center w-full text-left px-3 py-2.5 rounded-md hover:bg-sky-600 dark:hover:bg-sky-800 transition-colors">
-                <InfoIcon size={20} className="mr-3" /> Momba ny App
-              </button>
-            </li>
-            <li className="mb-3 border-t border-sky-600 dark:border-sky-700 pt-3">
-              <button onClick={onToggleDarkMode} className="flex items-center w-full text-left px-3 py-2.5 rounded-md hover:bg-sky-600 dark:hover:bg-sky-800 transition-colors">
-                {isDarkMode ? <Sun size={20} className="mr-3" /> : <Moon size={20} className="mr-3" />}
-                {isDarkMode ? "Hazavana" : "Maizina"}
-              </button>
-            </li>
-          </ul>
-        </nav>
-      </div>
+          ))}
+        </ul>
+        <div className="px-6 mb-2">
+          <span className="text-xs uppercase tracking-wider" style={{ color: sidebarText, letterSpacing: 1 }}>Other</span>
+        </div>
+        <ul>
+          <li className="px-2">
+            <button 
+              onClick={onToggleDarkMode} 
+              className="flex items-center w-full text-left px-4 py-2.5 rounded-lg transition-colors duration-150"
+              style={{ color: sidebarText, fontWeight: 400 }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = (isDarkMode ? colors.darkGradient : colors.lightGradient);
+                if (!isDarkMode) {
+                  e.currentTarget.style.color = '#fff'; // White text on hover in light mode
+                  // Also change icon color on hover in light mode
+                  const icon = e.currentTarget.querySelector('svg');
+                  if (icon) icon.style.color = '#fff';
+                }
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = 'transparent';
+                if (!isDarkMode) {
+                  e.currentTarget.style.color = sidebarText;
+                  // Revert icon color on mouse out in light mode
+                  const icon = e.currentTarget.querySelector('svg');
+                  if (icon) icon.style.color = sidebarIconColor;
+                }
+              }}
+            >
+              {isDarkMode ? <Sun size={20} className="mr-3" style={{ color: sidebarIconColor }} /> : <Moon size={20} className="mr-3" style={{ color: sidebarIconColor }} />}
+              {isDarkMode ? "Hazavana" : "Maizina"}
+            </button>
+          </li>
+        </ul>
+        <div className="absolute bottom-0 left-0 w-full h-10 border-t" style={{ borderColor: sidebarDivider }}></div>
+        {isOpen && <button 
+            onClick={onClose} 
+            className="absolute top-4 right-4 lg:hidden focus:outline-none focus:ring-2 rounded-full p-1 transition"
+            style={{ color: sidebarIconColor }} // Use sidebar icon color for close button
+            >
+          <X size={28} />
+        </button>}
+      </aside>
     </>
   );
 };
