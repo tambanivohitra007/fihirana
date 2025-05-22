@@ -106,7 +106,7 @@ const App = () => {
     // Manifest
     const manifest = {
       short_name: "Fihirana",
-      name: "Fihirana PWA (Static)",
+      name: "Fihirana Malagasy",
       icons: [
         { src: "https://placehold.co/192x192/0077b6/ffffff?text=Fs", type: "image/png", sizes: "192x192", purpose: "any maskable" },
         { src: "https://placehold.co/512x512/0077b6/ffffff?text=FihiranaS", type: "image/png", sizes: "512x512", purpose: "any maskable" }
@@ -115,7 +115,7 @@ const App = () => {
       display: "standalone",
       theme_color: "#0077b6",
       background_color: "#ffffff",
-      description: "Fampiharana hijerena ny hira ao amin'ny Fihirana FFPM (static data)."
+      description: "Fampiharana hijerena ny hira ao amin'ny Tiona Advantista Malagasy. Rindrasoftware 2025"
     };
     const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
     const manifestURL = URL.createObjectURL(manifestBlob);

@@ -10,7 +10,7 @@ const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode
     { name: 'themes', label: 'Lohahevitra', icon: Tag },
     { name: 'authors', label: 'Mpanoratra', icon: Users },
     { name: 'favorites', label: 'Ankafizina', icon: Star },
-    { name: 'about', label: 'Momba ny App', icon: InfoIcon },
+    { name: 'about', label: 'Momba ny Application', icon: InfoIcon },
   ];
 
   const sidebarBg = isDarkMode ? colors.darkSidebarBg : colors.lightSidebarBg;
