@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft, ListFilter } from 'lucide-react';
 import colors from '../colors';
 
-const SelectionListPage = ({ title, items, onSelectItem, onBack, isDarkMode }) => (
+const SelectionListPage = ({ title, items, onSelect, onBack, isDarkMode }) => (
   <div 
     className="p-4 md:p-6" // Removed card-like styling from the main container
     style={{ 
@@ -36,25 +36,25 @@ const SelectionListPage = ({ title, items, onSelectItem, onBack, isDarkMode }) =
           const originalTextColor = isDarkMode ? colors.darkCardTitle : colors.cardTitle;
           const originalBorderColor = isDarkMode ? colors.darkCardListItemBorder : colors.cardListItemBorder;
 
-          // Updated hoverBg to be more subtle, not the full gradient
-          const hoverBg = isDarkMode ? colors.darkSidebarActiveBg : colors.lightSidebarActiveBg; 
-          const hoverTextColor = isDarkMode ? colors.darkSidebarActiveText : '#fff'; // White text on hover for light mode
-          const hoverBorderColor = isDarkMode ? colors.darkAccent : colors.lightAccent;
+          // Updated hoverBg to be slightly darker than the item's original background
+          const hoverBg = isDarkMode ? colors.darkCardListItemBgHover : colors.cardListItemBgHover; 
+          const hoverTextColor = isDarkMode ? colors.darkCardTitle : colors.cardTitle; // Keep text color same on hover, or define specific hover text color
+          const hoverBorderColor = isDarkMode ? colors.darkAccent : colors.lightAccent; // Keep accent for border or use originalBorderColor
 
           return (
             <li 
               key={item} 
-              onClick={() => onSelectItem(item)}
+              onClick={() => onSelect(item)} // Changed onSelectItem to onSelect
               className="p-4 rounded-lg cursor-pointer transition-all duration-200 ease-in-out" // Removed shadow-md and hover:shadow-lg
               style={{ 
                 color: originalTextColor,
                 background: originalBg, 
-                border: `1px solid ${originalBorderColor}`,
+                borderBottom: `1px solid ${originalBorderColor}`, // Changed border to borderBottom
               }}
               onMouseOver={e => {
                 e.currentTarget.style.background = hoverBg;
                 e.currentTarget.style.color = hoverTextColor;
-                e.currentTarget.style.borderColor = hoverBorderColor;
+                e.currentTarget.style.borderColor = hoverBorderColor; // This will now affect borderBottom if set, or all borders if a general border is re-applied on hover
                 e.currentTarget.style.transform = 'translateY(-2px)';
                 e.currentTarget.style.boxShadow = 'none'; // Ensure no shadow on hover
               }}

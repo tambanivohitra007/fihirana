@@ -1,8 +1,8 @@
 import React from 'react';
-import { X, Home, ListMusic, Info as InfoIcon, Moon, Sun, Users, Star, Tag, Hash } from 'lucide-react'; // Added Hash
+import { X, Home, ListMusic, Info as InfoIcon, Moon, Sun, Users, Star, Tag, Hash, Download } from 'lucide-react'; // Added Download
 import colors from '../colors';
 
-const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode, currentPage, onOpenNumericInput }) => { // Added onOpenNumericInput
+const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode, currentPage, onOpenNumericInput, onInstallClick, showInstallButton }) => { // Added onInstallClick, showInstallButton
   if (!isOpen && window.innerWidth < 1024) return null;
 
   const navItems = [
@@ -117,6 +117,37 @@ const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode
               Nomerao
             </button>
           </li>
+          {showInstallButton && (
+            <li className="px-2">
+              <button
+                onClick={() => {
+                  onInstallClick();
+                  onClose(); // Close sidebar after clicking
+                }}
+                className="flex items-center w-full text-left px-4 py-2.5 rounded-lg transition-colors duration-150"
+                style={{ color: sidebarText, fontWeight: 400 }}
+                onMouseOver={e => {
+                  e.currentTarget.style.background = (isDarkMode ? colors.darkGradient : colors.lightGradient);
+                  if (!isDarkMode) {
+                    e.currentTarget.style.color = '#fff';
+                    const icon = e.currentTarget.querySelector('svg');
+                    if (icon) icon.style.color = '#fff';
+                  }
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.background = 'transparent';
+                  if (!isDarkMode) {
+                    e.currentTarget.style.color = sidebarText;
+                    const icon = e.currentTarget.querySelector('svg');
+                    if (icon) icon.style.color = sidebarIconColor;
+                  }
+                }}
+              >
+                <Download size={20} className="mr-3" style={{ color: sidebarIconColor }} />
+                Hametraka App
+              </button>
+            </li>
+          )}
           <li className="px-2">
             <button 
               onClick={() => {

@@ -27,6 +27,21 @@ const colors = {
   darkCardTitle: '#fff',
   darkCardSubtitle: '#b0b8c9',
   darkCardMuted: '#7b8ca6',
+
+  // Card List Item specific borders (New)
+  cardListItemBorder: '#e2e8f0', // Based on lightBorder
+  darkCardListItemBorder: '#393a3f', // Based on darkBorder
+
+  // Card List Item specific backgrounds and hover states (New)
+  // Assuming cardListItemBg might be similar to lightCard, and darkCardListItemBg to darkCard
+  // If you haven't defined cardListItemBg and darkCardListItemBg, you should add them.
+  // For example:
+  // cardListItemBg: '#f8fafc', // Example: similar to lightCard
+  // darkCardListItemBg: '#23262f', // Example: similar to darkCard
+
+  cardListItemBgHover: '#eef1f5', // Slightly darker for light mode items
+  darkCardListItemBgHover: '#2a2e37', // Slightly darker for dark mode items
+
   // Text colors
   darkText: '#ffffff', // main text in dark mode
   lightText: '#212226', // main text in light mode
@@ -63,7 +78,7 @@ const colors = {
   darkIconPurple: '#a78bfa',
   // Sidebar specific
   // Dark Mode Sidebar
-  darkSidebarBg: '#2e3a53', // deep blue
+  darkSidebarBg: '#212226', // deep blue
   darkSidebarActiveBg: '#364257', // lighter blue for selected/hover
   darkSidebarText: '#b0b8c9', // muted text
   darkSidebarActiveText: '#fff', // white for active
@@ -100,7 +115,7 @@ const colors = {
 
   // Sidebar title text (can be different from header text if needed)
   darkSidebarTitleText: '#FFFFFF',
-  lightSidebarTitleText: '#FFFFFF', // Assuming title is on the gradient header
+  lightSidebarTitleText: '#555555', // Assuming title is on the gradient header
 
   // General Icon color (if not specific like blue, red etc.)
   darkIcon: '#9CA3AF', // A general medium gray for icons in dark mode
