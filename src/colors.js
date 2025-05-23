@@ -32,6 +32,8 @@ const colors = {
   lightText: '#212226', // main text in light mode
   darkTextSecondary: '#b0b3b8', // muted/secondary text in dark mode
   lightTextSecondary: '#64748b', // muted/secondary text in light mode
+  darkTextTertiary: '#7b8ca6', // for even more muted text in dark mode
+  lightTextTertiary: '#a0aec0', // for even more muted text in light mode
   // Border colors
   darkBorder: '#393a3f',
   lightBorder: '#e2e8f0',
@@ -73,6 +75,36 @@ const colors = {
   lightSidebarText: '#4a5568', // a mid-gray for text
   lightSidebarActiveText: '#ffffff', // main accent color for active text - CHANGED TO WHITE FOR BETTER CONTRAST ON GRADIENT
   lightSidebarDivider: '#e2e8f0', // light gray divider
+
+  // Modal and Input specific colors (New)
+  darkModalBg: '#2D3748', // Dark background for modals
+  lightModalBg: '#FFFFFF', // Light background for modals
+  darkInputBg: '#4A5568',  // Dark background for input fields
+  lightInputBg: '#EDF2F7', // Light background for input fields
+
+  // Warning/Offline Banner colors
+  darkWarningBg: '#4A2E2E', // Darker red for warning background
+  lightWarningBg: '#FFF5F5', // Light red for warning background
+  darkWarningText: '#FEB2B2', // Lighter red text for dark warning
+  lightWarningText: '#C53030', // Darker red text for light warning
+  darkWarningBorder: '#C53030', // Dark red border for dark warning
+  lightWarningBorder: '#FEB2B2', // Light red border for light warning
+
+  // Error specific colors
+  darkError: '#F14666', // A bright error color for dark mode
+  lightError: '#CC0000', // A standard error color for light mode
+
+  // Footer colors
+  darkFooterBg: '#1A1B1E', // Very dark for footer in dark mode
+  lightFooterBg: '#f8fafc', // Consistent with light card for footer in light mode
+
+  // Sidebar title text (can be different from header text if needed)
+  darkSidebarTitleText: '#FFFFFF',
+  lightSidebarTitleText: '#FFFFFF', // Assuming title is on the gradient header
+
+  // General Icon color (if not specific like blue, red etc.)
+  darkIcon: '#9CA3AF', // A general medium gray for icons in dark mode
+  lightIcon: '#6B7280', // A general medium gray for icons in light mode
 };
 
 export default colors;

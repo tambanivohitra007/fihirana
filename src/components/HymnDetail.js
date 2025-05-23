@@ -3,21 +3,54 @@ import { ArrowLeft, Heart } from 'lucide-react';
 import colors from '../colors';
 
 const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode }) => {
+  console.log('[HymnDetail.js] Rendering. Received hymn prop:', hymn); 
+
   const formatDetails = (details) => {
+    console.log('[HymnDetail.js] formatDetails ORIGINAL LOGIC called. Details type:', typeof details, 'Length:', (details && details.length));
+
     if (typeof details !== 'string' || !details.trim()) {
-      return <p style={{ color: isDarkMode ? colors.darkCardMuted : colors.cardMuted }}><em>Tsy misy tononkira ho an'ity hira ity.</em></p>;
+      console.log('[HymnDetail.js] formatDetails: details is not a valid string or is empty/whitespace. Value:', details);
+      // Ensure the escape sequence for the apostrophe is correct for JavaScript strings
+      return <p style={{ color: isDarkMode ? colors.darkCardMuted : colors.cardMuted }}><em>Tsy misy tononkira ho an\\'ity hira ity.</em></p>;
     }
-    return details
-      .split(/\r\n|\r|\n/) // More robust newline splitting
-      .map((line, index, arr) => (
+
+    console.log('[HymnDetail.js] formatDetails: Processing details string.');
+    // Assuming hymn.detaille uses actual newline and tab characters
+    const lines = details.split(/\r\n|\r|\n/); // Corrected JS: uses actual CR/LF
+    console.log(`[HymnDetail.js] formatDetails: Split into ${lines.length} lines. First few lines:`, lines.slice(0, 5));
+
+    return lines.map((line, index, arr) => {
+      const isIndented = line.startsWith('\t'); // Corrected JS: uses actual TAB char
+      let lineContent = line;
+      if (isIndented) {
+        lineContent = line.substring(1); // Correct for removing a single tab character
+      }
+      
+      console.log(`[HymnDetail.js] formatDetails map [${index}]: rawLine="${line}", isIndented=${isIndented}, processedLineContent="${lineContent}"`);
+      
+      // Special styling for "Refrain:" or "Chorus:" type lines (case-insensitive)
+      // And also for "Tonony X:" (e.g., "Tonony 1:")
+      const trimmedLineContent = lineContent.trim();
+      let specialStyle = {};
+      if (/^(refrain|chorus|fiverenana|tontonana|andininy|verse|tonony\\s*\\d*):?/i.test(trimmedLineContent)) {
+        specialStyle = { fontWeight: 'bold', fontStyle: 'italic', marginTop: '0.5em', marginBottom: '0.25em' };
+        console.log(`[HymnDetail.js] formatDetails map [${index}]: Applying special style for structural line: "${trimmedLineContent}"`);
+      }
+
+      return (
         <React.Fragment key={index}>
-          {line.startsWith('\t') ? <span className="ml-4">{line.substring(1)}</span> : line}
-          {index < arr.length - 1 && <br />} {/* Add <br /> only if not the last line */}
+          {isIndented ? 
+            <span className="ml-4" style={specialStyle}>{lineContent}</span> : 
+            (Object.keys(specialStyle).length > 0 ? <div style={specialStyle}>{lineContent}</div> : lineContent)
+          }
+          {index < arr.length - 1 && <br />}
         </React.Fragment>
-      ));
+      );
+    });
   };
 
   if (!hymn) {
+    console.log('[HymnDetail.js] Condition !hymn is TRUE. Rendering "Mifidiana hira azafady."');
     return (
         <div className="p-4 md:p-6 rounded-lg shadow-xl text-center" 
              style={{ 
@@ -79,11 +112,36 @@ const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode }) 
           <Heart size={24} fill={isFavorite ? 'currentColor' : 'none'} />
         </button>
       </div>
-      <h2 className="text-2xl mb-2" style={{ color: isDarkMode ? colors.darkCardTitle : colors.cardTitle }}>{hymn.Titre}</h2>
-      <div className="mb-2 text-sm" style={{ color: isDarkMode ? colors.darkCardSubtitle : colors.cardSubtitle }}>{hymn.Auteur}</div>
-      <div className="mb-4 text-xs" style={{ color: isDarkMode ? colors.darkCardMuted : colors.cardMuted }}>{hymn.Theme1}</div>
-      
-      <div className="text-base whitespace-pre-line" style={{ color: isDarkMode ? colors.darkCardTitle : colors.cardTitle, fontFamily: 'inherit', lineHeight: '1.6' }}>
+      <h1 className="text-2xl mb-2" style={{ color: isDarkMode ? colors.darkCardTitle : colors.cardTitle }}>{hymn.num} - {hymn.Titre}</h1>
+      {hymn.Auteur && (
+        <div className="text-sm mb-1" style={{ color: isDarkMode ? colors.darkCardSubtitle : colors.cardSubtitle }}>
+          <strong>Auteur:</strong> {hymn.Auteur}
+        </div>
+      )}
+      {hymn.Compositeur && (
+        <div className="text-sm mb-1" style={{ color: isDarkMode ? colors.darkCardSubtitle : colors.cardSubtitle }}>
+          <strong>Compositeur:</strong> {hymn.Compositeur}
+        </div>
+      )}
+      {hymn.Tonalite && (
+        <div className="text-sm mb-1" style={{ color: isDarkMode ? colors.darkCardSubtitle : colors.cardSubtitle }}>
+          <strong>Tonalité:</strong> {hymn.Tonalite}
+        </div>
+      )}
+      {hymn.Theme1 && (
+        <div className="text-xs" style={{ color: isDarkMode ? colors.darkCardMuted : colors.cardMuted }}>
+          <strong>Thème:</strong> {hymn.Theme1}
+        </div>
+      )}
+      <div 
+        className="text-base whitespace-pre-line" 
+        style={{ 
+          color: isDarkMode ? colors.darkCardTitle : colors.cardTitle, 
+          fontFamily: 'inherit', 
+          lineHeight: '1.6'
+          // Removed temporary border, padding, and margin
+        }}
+      >
         {formatDetails(hymn.detaille)}
       </div>
 

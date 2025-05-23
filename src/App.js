@@ -11,6 +11,7 @@ import SidebarMenu from './components/SidebarMenu';
 import BottomNavigationBar from './components/BottomNavigationBar';
 import SelectionListPage from './components/SelectionListPage';
 import AboutPage from './components/AboutPage'; // Assuming AboutPage.js is in src/components/
+import NumericInputDialog from './components/NumericInputDialog'; // Import the new component
 
 const App = () => {
   // State for hymn data and UI
@@ -48,6 +49,10 @@ const App = () => {
     const savedFavorites = localStorage.getItem('fihiranaFavorites');
     return savedFavorites ? JSON.parse(savedFavorites) : [];
   });
+
+  // Numeric Input Dialog State
+  const [isNumericInputDialogOpen, setIsNumericInputDialogOpen] = useState(false);
+  const [numericInputValue, setNumericInputValue] = useState('');
 
   // Effect for Dark Mode
   useEffect(() => {
@@ -111,7 +116,7 @@ const App = () => {
         { src: "https://placehold.co/192x192/0077b6/ffffff?text=Fs", type: "image/png", sizes: "192x192", purpose: "any maskable" },
         { src: "https://placehold.co/512x512/0077b6/ffffff?text=FihiranaS", type: "image/png", sizes: "512x512", purpose: "any maskable" }
       ],
-      start_url: ".",
+      start_url: "/fihirana/",
       display: "standalone",
       theme_color: "#0077b6",
       background_color: "#ffffff",
@@ -290,13 +295,64 @@ const App = () => {
     return allHymns.filter(hymn => favorites.includes(hymn.Id_));
   }, [allHymns, favorites]);
 
+  // Numeric Input Dialog Handlers
+  const openNumericInputDialog = () => {
+    setNumericInputValue(''); // Clear previous input
+    setIsNumericInputDialogOpen(true);
+  };
+
+  const closeNumericInputDialog = () => {
+    setIsNumericInputDialogOpen(false);
+    // setNumericInputValue(''); // Optionally clear input on close, or keep for re-opening
+  };
+
+  const handleNumericInputClear = () => {
+    setNumericInputValue('');
+  };
+
+  const handleNumericInputEnter = (value) => {
+    if (!value) {
+      closeNumericInputDialog();
+      return;
+    }
+    // const hymnNumber = parseInt(value, 10);
+    // if (isNaN(hymnNumber)) {
+    //   console.warn("Invalid hymn number entered:", value);
+    //   closeNumericInputDialog();
+    //   return;
+    // }
+
+    // Ensure we are comparing string with string, as hymn.num is a string in JSON
+    const hymnNumberString = value.trim(); 
+    console.log(`[App.js] handleNumericInputEnter: Searching for hymn number (string): '${hymnNumberString}'`);
+
+    const targetHymn = allHymns.find(hymn => hymn.num === hymnNumberString);
+
+    if (targetHymn) {
+      console.log("[App.js] handleNumericInputEnter: Found targetHymn:", targetHymn);
+      handleSelectHymn(targetHymn);
+    } else {
+      console.warn(`[App.js] handleNumericInputEnter: Hymn number '${hymnNumberString}' not found.`);
+      alert(`Tsy misy hira mifandraika amin\'ny laharana : ${hymnNumberString}`); // Display alert
+    }
+    closeNumericInputDialog();
+  };
+
   // Navigation and Selection Handlers
   const handleSelectHymn = useCallback((hymn) => {
-    setSelectedHymn(hymn);
-    setCurrentPage('detail');
-    setIsSidebarOpen(false); 
+    console.log("[App.js] handleSelectHymn called. Hymn data:", hymn); // Log 1: Check if function is called and with what data
+    if (hymn && typeof hymn === 'object' && hymn.Id_ !== undefined) { // Basic check for a valid hymn object
+        setSelectedHymn(hymn);
+        setCurrentPage('detail');
+        console.log("[App.js] State updated: selectedHymn set, currentPage set to 'detail'. Hymn ID:", hymn.Id_); // Log 2: Confirm state setters are called
+    } else {
+        console.error("[App.js] handleSelectHymn called with invalid or null hymn data:", hymn); // Log 3: Error if hymn data is bad
+        // Prevent further execution if hymn data is invalid to avoid errors
+        return;
+    }
+    setIsSidebarOpen(false);
     window.scrollTo(0, 0);
-  }, []);
+  }, [setSelectedHymn, setCurrentPage, setIsSidebarOpen]); // Added stable setters to dependency array
 
   const handleBackToList = useCallback(() => {
     setSelectedHymn(null);
@@ -342,6 +398,7 @@ const App = () => {
 
   // Page Rendering Logic
   const renderPage = () => {
+    console.log(`[App.js] renderPage: currentPage='${currentPage}'. selectedHymn ID: ${selectedHymn ? selectedHymn.Id_ : 'null'}`); // Log 4: Check states at render time
     switch (currentPage) {
       case 'list':
         return (
@@ -391,7 +448,23 @@ const App = () => {
           </>
         );
       case 'detail':
-        return selectedHymn && <HymnDetail hymn={selectedHymn} onBack={handleBackToList} isFavorite={favorites.includes(selectedHymn.Id_)} onToggleFavorite={toggleFavorite} isDarkMode={isDarkMode} />; // Pass isDarkMode
+        if (selectedHymn) {
+          console.log("[App.js] renderPage: Rendering HymnDetail for hymn ID:", selectedHymn.Id_); // Log 5: Confirm attempt to render HymnDetail
+          return <HymnDetail hymn={selectedHymn} onBack={handleBackToList} isFavorite={favorites.includes(selectedHymn.Id_)} onToggleFavorite={toggleFavorite} isDarkMode={isDarkMode} />; // Pass isDarkMode
+        } else {
+          console.log("[App.js] renderPage: In 'detail' case, but selectedHymn is null. Not rendering HymnDetail."); // Log 6: selectedHymn is null
+          return (
+            <div className="text-center py-10">
+              <AlertTriangle size={48} className="mx-auto mb-4" style={{ color: isDarkMode ? colors.darkError : colors.lightError }} />
+              <p className="text-xl" style={{ color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}>
+                Tsy afaka nampiseho ny antsipirian'ny hira. Misy olana angamba.
+              </p>
+              <button onClick={handleBackToList} className="mt-4 px-4 py-2 rounded" style={{ background: isDarkMode ? colors.darkButtonPrimaryBg : colors.buttonPrimaryBg, color: isDarkMode ? colors.darkButtonPrimaryText : colors.buttonPrimaryText }}>
+                Miverina
+              </button>
+            </div>
+          );
+        }
       case 'themes':
         return <SelectionListPage title="Misafidy Lohahevitra" items={uniqueThemes} onSelectItem={handleThemeSelect} onBack={() => handleNavigate('list')} isDarkMode={isDarkMode} />; // Pass isDarkMode
       case 'authors':
@@ -466,6 +539,8 @@ const App = () => {
         onNavigate={handleNavigate}
         onToggleDarkMode={toggleDarkMode}
         isDarkMode={isDarkMode}
+        currentPage={currentPage} // Pass currentPage
+        onOpenNumericInput={openNumericInputDialog} // Pass function to open numeric input dialog
       />
       <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-64 xl:ml-72' : 'lg:ml-0'}`}>
         <header
@@ -485,12 +560,16 @@ const App = () => {
             >
               <Menu size={28} />
             </button>
-            <div className="flex items-center gap-3">
+            <button // Make this section clickable
+              onClick={openNumericInputDialog}
+              className="flex items-center gap-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-300 rounded-md p-1 -ml-1" // Added focus styles and padding
+              title="Hitady hira araka ny laharany"
+            >
               <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 shadow-lg ring-2 ring-sky-400">
                 <ListMusic size={28} className="text-sky-200" />
               </span>
               <span className="text-lg font-bold tracking-tight" style={{ color: sidebarTitleText }}>Fihirana</span>
-            </div>
+            </button>
             {showInstallButton && (
               <button
                 onClick={handleInstallClick}
@@ -518,6 +597,16 @@ const App = () => {
           {renderPage()}
         </main>
 
+        <NumericInputDialog
+          isOpen={isNumericInputDialogOpen}
+          onClose={closeNumericInputDialog}
+          onEnter={handleNumericInputEnter}
+          value={numericInputValue}
+          setValue={setNumericInputValue}
+          onClear={handleNumericInputClear}
+          isDarkMode={isDarkMode}
+        />
+        
         <BottomNavigationBar 
             onNavigate={handleNavigate} 
             currentPage={currentPage}
@@ -526,7 +615,7 @@ const App = () => {
         
         <footer className="text-center p-4 mt-auto transition-all duration-300 ease-in-out" style={{ background: isDarkMode ? colors.darkFooterBg : colors.lightCard, color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary, borderTop: isDarkMode ? `1px solid ${colors.darkBorder}`: 'none' }}>
           <p className="text-sm">
-            Fihirana PWA &copy; {new Date().getFullYear()}. Namboarina tamim-pitiavana.
+            Fihirana PWA &copy; {new Date().getFullYear()}. Namboarina tamim-pitiavana. 
           </p>
         </footer>
       </div>

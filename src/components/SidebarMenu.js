@@ -1,12 +1,12 @@
 import React from 'react';
-import { X, Home, ListMusic, Info as InfoIcon, Moon, Sun, Users, Star, Tag } from 'lucide-react';
+import { X, Home, ListMusic, Info as InfoIcon, Moon, Sun, Users, Star, Tag, Hash } from 'lucide-react'; // Added Hash
 import colors from '../colors';
 
-const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode, currentPage }) => {
+const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode, currentPage, onOpenNumericInput }) => { // Added onOpenNumericInput
   if (!isOpen && window.innerWidth < 1024) return null;
 
   const navItems = [
-    { name: 'list', label: 'Dashboard', icon: Home },
+    { name: 'list', label: 'Hira rehetra', icon: Home },
     { name: 'themes', label: 'Lohahevitra', icon: Tag },
     { name: 'authors', label: 'Mpanoratra', icon: Users },
     { name: 'favorites', label: 'Ankafizina', icon: Star },
@@ -89,8 +89,40 @@ const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode
         </div>
         <ul>
           <li className="px-2">
+            <button
+              onClick={() => {
+                onOpenNumericInput();
+                onClose(); // Close sidebar after clicking
+              }}
+              className="flex items-center w-full text-left px-4 py-2.5 rounded-lg transition-colors duration-150"
+              style={{ color: sidebarText, fontWeight: 400 }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = (isDarkMode ? colors.darkGradient : colors.lightGradient);
+                if (!isDarkMode) {
+                  e.currentTarget.style.color = '#fff';
+                  const icon = e.currentTarget.querySelector('svg');
+                  if (icon) icon.style.color = '#fff';
+                }
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = 'transparent';
+                if (!isDarkMode) {
+                  e.currentTarget.style.color = sidebarText;
+                  const icon = e.currentTarget.querySelector('svg');
+                  if (icon) icon.style.color = sidebarIconColor;
+                }
+              }}
+            >
+              <Hash size={20} className="mr-3" style={{ color: sidebarIconColor }} />
+              Nomerao
+            </button>
+          </li>
+          <li className="px-2">
             <button 
-              onClick={onToggleDarkMode} 
+              onClick={() => {
+                onToggleDarkMode();
+                // onClose(); // Keep sidebar open for dark mode toggle, or close if preferred
+              }}
               className="flex items-center w-full text-left px-4 py-2.5 rounded-lg transition-colors duration-150"
               style={{ color: sidebarText, fontWeight: 400 }}
               onMouseOver={e => {
