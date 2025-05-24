@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ListMusic, Download, XCircle, AlertTriangle, WifiOff, Menu, Star, Info as InfoIconLucide, Search } from 'lucide-react'; // Added Search
+import { ListMusic, Download, XCircle, AlertTriangle, WifiOff, Menu, Star, Info as InfoIconLucide, Search, SlidersHorizontal, X } from 'lucide-react'; // Added X for clear button
 import colors from './colors';
 
 // Import separated components
@@ -21,8 +21,8 @@ const App = () => {
 
   // State for search and filtering
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeThemeFilter, setActiveThemeFilter] = useState(''); 
-  const [activeAuthorFilter, setActiveAuthorFilter] = useState(''); 
+  const [activeThemeFilter, setActiveThemeFilter] = useState(null);
+  const [activeAuthorFilter, setActiveAuthorFilter] = useState(null);
 
   // State for navigation and selected hymn
   const [selectedHymn, setSelectedHymn] = useState(null);
@@ -89,6 +89,28 @@ const App = () => {
         setCurrentPage('list'); // If search is cleared from non-list page, go to list
       }
     }
+  };
+
+  const clearAllFilters = () => {
+    setActiveThemeFilter(null);
+    setActiveAuthorFilter(null);
+    setSearchTerm('');
+    // Optionally, navigate back to the main list if not already there
+    // setCurrentPage('list'); 
+  };
+
+  const handleThemeSelection = (theme) => {
+    setActiveThemeFilter(theme);
+    setActiveAuthorFilter(null); // Clear author filter when theme is selected
+    setCurrentPage('list');
+    setIsSidebarOpen(false); // Close sidebar
+  };
+
+  const handleAuthorSelection = (author) => {
+    setActiveAuthorFilter(author);
+    setActiveThemeFilter(null); // Clear theme filter when author is selected
+    setCurrentPage('list');
+    setIsSidebarOpen(false); // Close sidebar
   };
 
   // Effect for Storing Favorites
@@ -433,6 +455,30 @@ const App = () => {
       case 'list':
         return (
           <>
+            {/* Display active filters and clear button */}
+            {(activeThemeFilter || activeAuthorFilter) && (
+              <div 
+                className="mb-4 p-3 rounded-lg flex justify-between items-center shadow" 
+                style={{ 
+                  background: isDarkMode ? colors.darkCard : colors.lightCard, 
+                  color: isDarkMode ? colors.darkText : colors.lightText, 
+                  border: `1px solid ${isDarkMode ? colors.darkBorder : colors.lightBorder}` 
+                }}
+              >
+                <div>
+                  {activeThemeFilter && <span className="font-semibold">Lohahevitra: {activeThemeFilter}</span>}
+                  {activeAuthorFilter && <span className="font-semibold">Mpanoratra: {activeAuthorFilter}</span>}
+                </div>
+                <button
+                  onClick={clearAllFilters}
+                  className="p-1 rounded-full hover:bg-gray-500/20 transition-colors"
+                  aria-label="Esory ny sivana"
+                  style={{ color: isDarkMode ? (colors.darkIcon || '#9CA3AF') : (colors.lightIcon || '#6B7280') }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            )}
             {/* SearchBar is now global, remove from here */}
             {filteredHymns.length === 0 && (searchTerm || activeAuthorFilter || activeThemeFilter) && !isLoading && (
               <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkMutedText : colors.lightMutedText }}>
@@ -562,7 +608,7 @@ const App = () => {
                currentPage === 'themes' ? 'Lohahevitra' :
                currentPage === 'authors' ? 'Mpanoratra' :
                currentPage === 'favorites' ? 'Ankafizina' :
-               currentPage === 'about' ? 'Momba ny App' :
+               currentPage === 'about' ? 'Momba ny Application' :
                'Fihirana Malagasy '}
             </span>
           </div>

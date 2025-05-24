@@ -10,9 +10,9 @@ const AboutPage = ({ onBack, isDarkMode }) => (
         border: `1px solid ${isDarkMode ? colors.darkCardBorder : colors.cardBorder}` 
       }}
     >
-      <h2 className="text-2xl mb-2" style={{ color: isDarkMode ? colors.darkCardTitle : colors.cardTitle }}>Momba ny App</h2>
+      <h2 className="text-2xl mb-2" style={{ color: isDarkMode ? colors.darkCardTitle : colors.cardTitle }}>Momba ny Application</h2>
       <p className="mb-2" style={{ color: isDarkMode ? colors.darkCardSubtitle : colors.cardSubtitle }}>Fihirana PWA</p>
-      <p className="text-sm" style={{ color: isDarkMode ? colors.darkCardMuted : colors.cardMuted }}>Fampiharana hijerena ny hira ao amin'ny Fihirana FFPM (static data).</p>
+      <p className="text-sm" style={{ color: isDarkMode ? colors.darkCardMuted : colors.cardMuted }}>Fampiharana hijerena ny hira ao amin'ny Tiona Advantista Malagasy. Rindrasoftware 2025</p>
       <button
         onClick={onBack}
         className="mt-6 inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-200"
