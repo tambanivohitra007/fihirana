@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ListFilter } from 'lucide-react';
+import { ListFilter } from 'lucide-react';
 import colors from '../colors';
 
 const SelectionListPage = ({ title, items, onSelect, onBack, isDarkMode }) => (
@@ -9,22 +9,9 @@ const SelectionListPage = ({ title, items, onSelect, onBack, isDarkMode }) => (
       background: isDarkMode ? colors.darkBg : colors.lightBg, // Use main background colors
     }}
   >
-    <button
-        onClick={onBack}
-        className="mb-6 flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-        style={{ 
-          background: isDarkMode ? colors.darkButtonSecondaryBg : colors.buttonSecondaryBg, 
-          color: isDarkMode ? colors.darkButtonSecondaryText : colors.buttonSecondaryText,
-          // Removed border and shadow from back button, assuming it's part of the page, not a card
-        }}
-        onMouseOver={e => e.currentTarget.style.background = isDarkMode ? colors.darkButtonSecondaryHoverBg : colors.buttonSecondaryHoverBg}
-        onMouseOut={e => e.currentTarget.style.background = isDarkMode ? colors.darkButtonSecondaryBg : colors.buttonSecondaryBg}
-      >
-        <ArrowLeft size={20} className="mr-2" /> Miverina
-      </button>
     <h2 
       className="text-2xl font-bold mb-4"
-      style={{ color: isDarkMode ? colors.darkPrimaryText : colors.lightPrimaryText }} // Use primary text colors
+      style={{ color: isDarkMode ? colors.darkHeaderText : colors.lightHeaderText }}
     >
       {title}
     </h2>

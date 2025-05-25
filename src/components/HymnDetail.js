@@ -1,9 +1,41 @@
-import React from 'react';
-import { ArrowLeft, Heart } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react'; // Added useEffect and useCallback
+import { Heart, ZoomIn, ZoomOut } from 'lucide-react';
+import { useSwipeable } from 'react-swipeable'; // Import useSwipeable
 import colors from '../colors';
 
-const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode }) => {
+const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode, onSwipeNext, onSwipePrev, currentHymnIndex, totalHymns }) => {
   console.log('[HymnDetail.js] Rendering. Received hymn prop:', hymn); 
+
+  // State for font size - initial size 16px
+  const [fontSize, setFontSize] = useState(16);
+
+  const handleZoomIn = () => {
+    setFontSize(prevSize => Math.min(prevSize + 2, 32)); // Max font size 32px
+  };
+
+  const handleZoomOut = () => {
+    setFontSize(prevSize => Math.max(prevSize - 2, 10)); // Min font size 10px
+  };
+
+  // Swipe handlers
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      console.log("[HymnDetail.js] Swiped Left - Next Hymn");
+      if (onSwipeNext) onSwipeNext();
+    },
+    onSwipedRight: () => {
+      console.log("[HymnDetail.js] Swiped Right - Previous Hymn");
+      if (onSwipePrev) onSwipePrev();
+    },
+    preventScrollOnSwipe: false, // Changed from true
+    trackMouse: true // Optional: allow swiping with mouse for easier desktop testing
+  });
+
+  // Reset font size when hymn changes
+  useEffect(() => {
+    setFontSize(16); // Reset to default font size
+  }, [hymn]);
+
 
   const formatDetails = (details) => {
     console.log('[HymnDetail.js] formatDetails ORIGINAL LOGIC called. Details type:', typeof details, 'Length:', (details && details.length));
@@ -50,7 +82,7 @@ const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode }) 
   };
 
   if (!hymn) {
-    console.log('[HymnDetail.js] Condition !hymn is TRUE. Rendering "Mifidiana hira azafady."');
+    console.log('[HymnDetail.js] Condition !hymn is TRUE. Rendering "Mifidiana hira azafady.');
     return (
         <div className="p-4 md:p-6 rounded-lg shadow-xl text-center" 
              style={{ 
@@ -60,57 +92,54 @@ const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode }) 
                borderStyle: 'solid'
              }}>
             <p style={{ color: isDarkMode ? colors.darkCardSubtitle : colors.cardSubtitle }}>Mifidiana hira azafady.</p>
-             <button
-                onClick={onBack}
-                className="mt-4 inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-200"
-                style={{
-                  background: isDarkMode ? colors.darkButtonPrimaryBg : colors.buttonPrimaryBg,
-                  color: isDarkMode ? colors.darkButtonPrimaryText : colors.buttonPrimaryText,
-                  ':hover': {
-                    background: isDarkMode ? colors.darkButtonPrimaryHoverBg : colors.buttonPrimaryHoverBg,
-                  }
-                }}
-            >
-                <ArrowLeft size={20} className="mr-2" /> Miverina
-            </button>
         </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-4 md:p-6 rounded-xl" 
+    <div {...swipeHandlers} className="max-w-2xl mx-auto p-4 md:p-6 rounded-xl select-none" // Added swipeHandlers and select-none
          style={{ 
            background: isDarkMode ? colors.darkCard : colors.cardBg, 
            boxShadow: isDarkMode ? colors.darkCardShadow : colors.cardShadow, 
-           border: `1px solid ${isDarkMode ? colors.darkCardBorder : colors.cardBorder}` 
+           border: `1px solid ${isDarkMode ? colors.darkCardBorder : colors.cardBorder}`,
+           touchAction: 'pan-y' // Allow vertical scroll but handle horizontal with swipeable
          }}>
-      <div className="flex justify-between items-start mb-6">
-        <button
-          onClick={onBack}
-          className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200"
-          style={{
-            background: isDarkMode ? colors.darkButtonPrimaryBg : colors.buttonPrimaryBg,
-            color: isDarkMode ? colors.darkButtonPrimaryText : colors.buttonPrimaryText,
-            ':hover': {
-              background: isDarkMode ? colors.darkButtonPrimaryHoverBg : colors.buttonPrimaryHoverBg,
-            }
-          }}
-        >
-          <ArrowLeft size={20} className="mr-2" /> Miverina
-        </button>
+      <div className="flex justify-between items-center mb-4"> 
+        {/* Favorite Button */}
         <button 
           onClick={() => onToggleFavorite(hymn.Id_)} 
-          className={`p-2 rounded-full transition-colors ${isFavorite ? 'text-red-500 bg-red-100 dark:text-red-400 dark:bg-red-900' : ''}`}
+          className={`p-2 rounded-full transition-colors ${isFavorite ? 'text-red-500 bg-red-100 dark:text-red-400 dark:bg-red-900' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
           style={!isFavorite ? {
             color: isDarkMode ? colors.darkIconColor : colors.iconColor,
-            ':hover': {
-              background: isDarkMode ? colors.darkIconHoverBg : colors.iconHoverBg,
-            }
+            // Using className for hover now, direct style hover is tricky
           } : {}}
           aria-label={isFavorite ? "Esory amin'ny ankafizina" : "Ampio amin'ny ankafizina"}
         >
           <Heart size={24} fill={isFavorite ? 'currentColor' : 'none'} />
         </button>
+
+        {/* Zoom Controls */}
+        <div className="flex items-center space-x-2">
+          <button 
+            onClick={handleZoomOut}
+            className="p-2 rounded-full transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+            style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+            aria-label="Henao ny haben'ny soratra"
+            disabled={fontSize <= 10} // Disable if at min font size
+          >
+            <ZoomOut size={22} />
+          </button>
+          <span className="text-sm w-6 text-center" style={{color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary}}>{fontSize}px</span>
+          <button 
+            onClick={handleZoomIn}
+            className="p-2 rounded-full transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+            style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+            aria-label="Halehibeazo ny haben'ny soratra"
+            disabled={fontSize >= 32} // Disable if at max font size
+          >
+            <ZoomIn size={22} />
+          </button>
+        </div>
       </div>
       <h1 className="text-2xl mb-2" style={{ color: isDarkMode ? colors.darkCardTitle : colors.cardTitle }}>{hymn.num} - {hymn.Titre}</h1>
       {hymn.Auteur && (
@@ -134,51 +163,17 @@ const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode }) 
         </div>
       )}
       <div 
-        className="text-base whitespace-pre-line" 
+        className="text-base whitespace-pre-line mt-4" // Added mt-4 for spacing
         style={{ 
           color: isDarkMode ? colors.darkCardTitle : colors.cardTitle, 
           fontFamily: 'inherit', 
-          lineHeight: '1.6'
+          lineHeight: '1.6',
+          fontSize: `${fontSize}px` // Apply dynamic font size
           // Removed temporary border, padding, and margin
         }}
       >
         {formatDetails(hymn.detaille)}
       </div>
-
-      <button 
-        onClick={onBack} 
-        className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
-        style={{ 
-          background: isDarkMode ? colors.darkButtonSecondaryBg : colors.buttonSecondaryBg, 
-          color: isDarkMode ? colors.darkButtonSecondaryText : colors.buttonSecondaryText,
-          ':hover': {
-            background: isDarkMode ? colors.darkButtonSecondaryHoverBg : colors.buttonSecondaryHoverBg,
-          }
-        }}
-      >
-        Miverina
-      </button>
-      {onToggleFavorite && (
-        <button 
-          onClick={() => onToggleFavorite(hymn.Id_)} 
-          className="ml-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
-          style={{ 
-            background: isFavorite 
-              ? (isDarkMode ? colors.darkButtonPrimaryBg : colors.buttonPrimaryBg) 
-              : (isDarkMode ? colors.darkButtonSecondaryBg : colors.buttonSecondaryBg), 
-            color: isFavorite 
-              ? (isDarkMode ? colors.darkButtonPrimaryText : colors.buttonPrimaryText) 
-              : (isDarkMode ? colors.darkButtonSecondaryText : colors.buttonSecondaryText),
-            ':hover': {
-              background: isFavorite 
-                ? (isDarkMode ? colors.darkButtonPrimaryHoverBg : colors.buttonPrimaryHoverBg) 
-                : (isDarkMode ? colors.darkButtonSecondaryHoverBg : colors.buttonSecondaryHoverBg),
-            }
-          }}
-        >
-          {isFavorite ? 'Esory amin\'ny ankafizina' : 'Ankafizo'}
-        </button>
-      )}
     </div>
   );
 };

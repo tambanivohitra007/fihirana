@@ -99,27 +99,31 @@ const colors = {
 
   // Warning/Offline Banner colors
   darkWarningBg: '#4A2E2E', // Darker red for warning background
-  lightWarningBg: '#FFF5F5', // Light red for warning background
-  darkWarningText: '#FEB2B2', // Lighter red text for dark warning
-  lightWarningText: '#C53030', // Darker red text for light warning
-  darkWarningBorder: '#C53030', // Dark red border for dark warning
-  lightWarningBorder: '#FEB2B2', // Light red border for light warning
+  lightWarningBg: '#FFF9DB', // Light yellow for warning background
+  darkWarningText: '#FED7D7', // Light red text for dark warning
+  lightWarningText: '#744210', // Dark yellow/brown text for light warning
 
-  // Error specific colors
-  darkError: '#F14666', // A bright error color for dark mode
-  lightError: '#CC0000', // A standard error color for light mode
+  // Notification Colors (New)
+  darkErrorBg: '#5A2E2E',
+  lightErrorBg: '#FFF5F5',
+  darkErrorText: '#FED7D7',
+  lightErrorText: '#C53030',
+  darkErrorIcon: '#F56565',
+  lightErrorIcon: '#E53E3E',
 
-  // Footer colors
-  darkFooterBg: '#1A1B1E', // Very dark for footer in dark mode
-  lightFooterBg: '#f8fafc', // Consistent with light card for footer in light mode
+  darkSuccessBg: '#2A4B35',
+  lightSuccessBg: '#F0FFF4',
+  darkSuccessText: '#C6F6D5',
+  lightSuccessText: '#2F855A',
+  darkSuccessIcon: '#68D391',
+  lightSuccessIcon: '#38A169',
 
-  // Sidebar title text (can be different from header text if needed)
-  darkSidebarTitleText: '#FFFFFF',
-  lightSidebarTitleText: '#555555', // Assuming title is on the gradient header
-
-  // General Icon color (if not specific like blue, red etc.)
-  darkIcon: '#9CA3AF', // A general medium gray for icons in dark mode
-  lightIcon: '#6B7280', // A general medium gray for icons in light mode
+  darkInfoBg: '#2D3748', // Can reuse modal or a new specific color
+  lightInfoBg: '#EBF8FF', // Can reuse modal or a new specific color
+  darkInfoText: '#FFFFFF',
+  lightInfoText: '#1A202C',
+  darkInfoIcon: '#63B3ED',
+  lightInfoIcon: '#3182CE',
 };
 
 export default colors;

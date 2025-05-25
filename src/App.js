@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ListMusic, Download, XCircle, AlertTriangle, WifiOff, Menu, Star, Info as InfoIconLucide, Search, SlidersHorizontal, X } from 'lucide-react'; // Added X for clear button
+import { ListMusic, Download, XCircle, AlertTriangle, WifiOff, Menu, Star, Info as InfoIconLucide, Search, SlidersHorizontal, X, ArrowLeft } from 'lucide-react'; // Added X for clear button, ArrowLeft for back button
 import colors from './colors';
 
 // Import separated components
@@ -12,6 +12,7 @@ import BottomNavigationBar from './components/BottomNavigationBar';
 import SelectionListPage from './components/SelectionListPage';
 import AboutPage from './components/AboutPage'; // Assuming AboutPage.js is in src/components/
 import NumericInputDialog from './components/NumericInputDialog'; // Import the new component
+import Notification from './components/Notification'; // Import Notification component
 
 const App = () => {
   // State for hymn data and UI
@@ -40,6 +41,14 @@ const App = () => {
     return savedMode ? JSON.parse(savedMode) : window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [isSearchBarVisible, setIsSearchBarVisible] = useState(false); // New state for global search bar
+  const [previousPageForDetail, setPreviousPageForDetail] = useState('list'); // For back button from detail
+
+  // Numeric Input Dialog State
+  const [isNumericInputDialogOpen, setIsNumericInputDialogOpen] = useState(false);
+  const [numericInputValue, setNumericInputValue] = useState('');
+
+  // Notification State (New)
+  const [notification, setNotification] = useState({ message: '', type: 'info', key: 0 });
 
   const sidebarTitleText = useMemo(() => {
     return isDarkMode ? colors.darkSidebarTitleText : colors.lightSidebarTitleText;
@@ -54,10 +63,6 @@ const App = () => {
     return savedFavorites ? JSON.parse(savedFavorites) : [];
   });
 
-  // Numeric Input Dialog State
-  const [isNumericInputDialogOpen, setIsNumericInputDialogOpen] = useState(false);
-  const [numericInputValue, setNumericInputValue] = useState('');
-
   // Effect for Dark Mode
   useEffect(() => {
     if (isDarkMode) {
@@ -71,6 +76,7 @@ const App = () => {
   const toggleDarkMode = () => {
     setIsDarkMode(prevMode => !prevMode);
     // setIsSidebarOpen(false); // User might want to keep sidebar open
+    showNotification(isDarkMode ? 'Light mode enabled' : 'Dark mode enabled', 'info');
   };
 
   const toggleSearchBar = () => {
@@ -95,6 +101,7 @@ const App = () => {
     setActiveThemeFilter(null);
     setActiveAuthorFilter(null);
     setSearchTerm('');
+    showNotification('Sivana rehetra voaaisotra', 'info');
     // Optionally, navigate back to the main list if not already there
     // setCurrentPage('list'); 
   };
@@ -110,6 +117,7 @@ const App = () => {
     setActiveAuthorFilter(author);
     setActiveThemeFilter(null); // Clear theme filter when author is selected
     setCurrentPage('list');
+    showNotification(`Sivana araka ny mpanoratra: ${author}`, 'info');
     setIsSidebarOpen(false); // Close sidebar
   };
 
@@ -119,11 +127,18 @@ const App = () => {
   }, [favorites]);
 
   const toggleFavorite = (hymnId) => {
-    setFavorites(prevFavorites => 
-      prevFavorites.includes(hymnId)
-        ? prevFavorites.filter(id => id !== hymnId)
-        : [...prevFavorites, hymnId]
-    );
+    const hymn = allHymns.find(h => h.Id_ === hymnId);
+    let message = '';
+    setFavorites(prevFavorites => {
+      if (prevFavorites.includes(hymnId)) {
+        message = `${hymn ? hymn.Titre : 'Hira'} nesorina tao amin'ny ankafizina.`;
+        return prevFavorites.filter(id => id !== hymnId);
+      } else {
+        message = `${hymn ? hymn.Titre : 'Hira'} nampiana tao amin'ny ankafizina.`;
+        return [...prevFavorites, hymnId];
+      }
+    });
+    showNotification(message, 'success');
   };
 
   // Effect for PWA Install Prompt
@@ -278,10 +293,12 @@ const App = () => {
       .then((data) => {
         setAllHymns(data.hiras || []);
         setIsLoading(false);
+        // showNotification('Hira rehetra voaray.', 'success'); // Optional: notify on successful data load
       })
       .catch((err) => {
         setError(err.message);
         setIsLoading(false);
+        showNotification(`Hadisoana: ${err.message}`, 'error');
       });
   }, []);
 
@@ -290,6 +307,11 @@ const App = () => {
     if (!installPrompt) return;
     const { outcome } = await installPrompt.prompt();
     console.log(`User response to the install prompt: ${outcome}`);
+    if (outcome === 'accepted') {
+      showNotification('Application tafapetraka soa aman-tsara!', 'success');
+    } else {
+      showNotification('Tsy tafapetraka ny application.', 'info');
+    }
     setInstallPrompt(null);
     setShowInstallButton(false);
   };
@@ -350,6 +372,14 @@ const App = () => {
     // setNumericInputValue(''); // Optionally clear input on close, or keep for re-opening
   };
 
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type, key: Date.now() }); // Use key to re-trigger notification even if message is same
+  };
+
+  const closeNotification = () => {
+    setNotification({ message: '', type: 'info', key: 0 });
+  };
+
   const handleNumericInputClear = () => {
     setNumericInputValue('');
   };
@@ -375,9 +405,11 @@ const App = () => {
     if (targetHymn) {
       console.log("[App.js] handleNumericInputEnter: Found targetHymn:", targetHymn);
       handleSelectHymn(targetHymn);
+      showNotification(`Hira ${hymnNumberString}: ${targetHymn.Titre} misokatra.`, 'info');
     } else {
       console.warn(`[App.js] handleNumericInputEnter: Hymn number '${hymnNumberString}' not found.`);
-      alert(`Tsy misy hira mifandraika amin\'ny laharana : ${hymnNumberString}`); // Display alert
+      // alert(`Tsy misy hira mifandraika amin\'ny laharana : ${hymnNumberString}`); // Display alert
+      showNotification(`Tsy misy hira mifandraika amin\'ny laharana : ${hymnNumberString}`, 'error');
     }
     closeNumericInputDialog();
   };
@@ -386,6 +418,7 @@ const App = () => {
   const handleSelectHymn = useCallback((hymn) => {
     console.log("[App.js] handleSelectHymn called. Hymn data:", hymn); // Log 1: Check if function is called and with what data
     if (hymn && typeof hymn === 'object' && hymn.Id_ !== undefined) { // Basic check for a valid hymn object
+        setPreviousPageForDetail(currentPage); // Capture current page before navigating to detail
         setSelectedHymn(hymn);
         setCurrentPage('detail');
         console.log("[App.js] State updated: selectedHymn set, currentPage set to 'detail'. Hymn ID:", hymn.Id_); // Log 2: Confirm state setters are called
@@ -396,19 +429,46 @@ const App = () => {
     }
     setIsSidebarOpen(false);
     window.scrollTo(0, 0);
-  }, [setSelectedHymn, setCurrentPage, setIsSidebarOpen]); // Added stable setters to dependency array
+  }, [currentPage, setSelectedHymn, setCurrentPage, setIsSidebarOpen, setPreviousPageForDetail]); // Added dependencies
+
+  const handleSwipeToNextHymn = useCallback(() => {
+    if (!selectedHymn || filteredHymns.length <= 1) return;
+    const currentIndex = filteredHymns.findIndex(h => h.Id_ === selectedHymn.Id_);
+    if (currentIndex === -1) return; // Should not happen if selectedHymn is from filteredHymns
+
+    const nextIndex = (currentIndex + 1) % filteredHymns.length;
+    const nextHymn = filteredHymns[nextIndex];
+    if (nextHymn) {
+      // Don't change previousPageForDetail here, as we are still in a "detail-like" view sequence
+      setSelectedHymn(nextHymn);
+      // setCurrentPage('detail'); // Already on detail page
+      window.scrollTo(0, 0);
+      showNotification(`Hira Manaraka: ${nextHymn.num}. ${nextHymn.Titre}`, 'info');
+    }
+  }, [selectedHymn, filteredHymns, setSelectedHymn, showNotification]);
+
+  const handleSwipeToPrevHymn = useCallback(() => {
+    if (!selectedHymn || filteredHymns.length <= 1) return;
+    const currentIndex = filteredHymns.findIndex(h => h.Id_ === selectedHymn.Id_);
+    if (currentIndex === -1) return;
+
+    const prevIndex = (currentIndex - 1 + filteredHymns.length) % filteredHymns.length;
+    const prevHymn = filteredHymns[prevIndex];
+    if (prevHymn) {
+      setSelectedHymn(prevHymn);
+      window.scrollTo(0, 0);
+      showNotification(`Hira Teo Aloha: ${prevHymn.num}. ${prevHymn.Titre}`, 'info');
+    }
+  }, [selectedHymn, filteredHymns, setSelectedHymn, showNotification]);
+
 
   const handleBackToList = useCallback(() => {
     setSelectedHymn(null);
-    // Logic to determine which list to return to
-    if (activeThemeFilter || activeAuthorFilter) {
-        setCurrentPage('list'); 
-    } else if (currentPage === 'favorites') {
-        setCurrentPage('favorites');
-    } else {
-        setCurrentPage('list');
-    }
-  }, [activeThemeFilter, activeAuthorFilter, currentPage]);
+    // Navigate back to the page stored in previousPageForDetail
+    setCurrentPage(previousPageForDetail);
+    // Filters and search term will naturally be preserved if previousPageForDetail was 'list'
+    // and they were active then.
+  }, [previousPageForDetail, setCurrentPage, setSelectedHymn]);
 
   const handleNavigate = (page) => {
     setCurrentPage(page);
@@ -438,6 +498,7 @@ const App = () => {
     setActiveThemeFilter(theme);
     setActiveAuthorFilter(''); 
     setCurrentPage('list');
+    showNotification(`Sivana araka ny lohahevitra: ${theme}`, 'info');
     setIsSidebarOpen(false);
   };
 
@@ -447,6 +508,26 @@ const App = () => {
     setCurrentPage('list');
     setIsSidebarOpen(false);
   };
+
+  // Back button logic
+  const showBackButton = useMemo(() => {
+    return currentPage === 'detail' || 
+           currentPage === 'themes' || 
+           currentPage === 'authors' || 
+           currentPage === 'favorites' || 
+           currentPage === 'about';
+  }, [currentPage]);
+
+  const handleHeaderBackClick = useCallback(() => {
+    if (currentPage === 'detail') {
+      handleBackToList();
+    } else if (['themes', 'authors', 'favorites', 'about'].includes(currentPage)) {
+      setCurrentPage('list');
+      // setSelectedHymn(null); // Already null if not on detail page
+      window.scrollTo(0, 0);
+    }
+  }, [currentPage, handleBackToList, setCurrentPage]);
+
 
   // Page Rendering Logic
   const renderPage = () => {
@@ -473,7 +554,7 @@ const App = () => {
                   onClick={clearAllFilters}
                   className="p-1 rounded-full hover:bg-gray-500/20 transition-colors"
                   aria-label="Esory ny sivana"
-                  style={{ color: isDarkMode ? (colors.darkIcon || '#9CA3AF') : (colors.lightIcon || '#6B7280') }}
+                  style={{ color: isDarkMode ? (colors.darkIconColor || '#9CA3AF') : (colors.iconColor || '#6B7280') }} // Updated to use new color variables
                 >
                   <X size={20} />
                 </button>
@@ -481,13 +562,13 @@ const App = () => {
             )}
             {/* SearchBar is now global, remove from here */}
             {filteredHymns.length === 0 && (searchTerm || activeAuthorFilter || activeThemeFilter) && !isLoading && (
-              <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkMutedText : colors.lightMutedText }}>
+              <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}> {/* Updated to use TextSecondary */}
                 <XCircle size={48} className="mx-auto mb-2" />
                 <p>Tsy misy hira mifanaraka amin'ny sivana.</p>
               </div>
             )}
              {filteredHymns.length === 0 && !searchTerm && !activeAuthorFilter && !activeThemeFilter && !isLoading && (
-              <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkMutedText : colors.lightMutedText }}>
+              <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}> {/* Updated to use TextSecondary */}
                 <ListMusic size={48} className="mx-auto mb-2" />
                 <p>Tsy misy hira.</p> {/* Or message indicating no hymns loaded if allHymns is empty */}
               </div>
@@ -516,20 +597,23 @@ const App = () => {
             isDarkMode={isDarkMode} 
             isFavorite={favorites.includes(selectedHymn.Id_)}
             onToggleFavorite={() => toggleFavorite(selectedHymn.Id_)}
+            onSwipeNext={handleSwipeToNextHymn} // Pass handler
+            onSwipePrev={handleSwipeToPrevHymn} // Pass handler
+            // currentHymnIndex and totalHymns could be passed for more sophisticated UI if needed
           />
         ) : (
           <div>Mifidiana hira...</div>
         );
       case 'themes':
-        return <SelectionListPage title="Lohahevitra" items={uniqueThemes} onSelect={handleThemeSelect} isDarkMode={isDarkMode} />;
+        return <SelectionListPage title="Lohahevitra" items={uniqueThemes} onSelect={handleThemeSelect} isDarkMode={isDarkMode} onBack={() => handleNavigate('list')} />;
       case 'authors':
-        return <SelectionListPage title="Mpanoratra" items={uniqueAuthors} onSelect={handleAuthorSelect} isDarkMode={isDarkMode} />;
+        return <SelectionListPage title="Mpanoratra" items={uniqueAuthors} onSelect={handleAuthorSelect} isDarkMode={isDarkMode} onBack={() => handleNavigate('list')} />;
       case 'favorites':
         return (
           <>
             <h2 className="text-xl font-semibold mb-4" style={{ color: isDarkMode ? colors.darkText : colors.lightText }}>Hira Ankafizina</h2>
             {favoriteHymns.length === 0 ? (
-              <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkMutedText : colors.lightMutedText }}>
+              <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}> {/* Updated to use TextSecondary */}
                 <Star size={48} className="mx-auto mb-2" />
                 <p>Tsy misy hira ankafizina voatahiry.</p>
               </div>
@@ -558,7 +642,7 @@ const App = () => {
                     const numMatch = hymn.num.toString().includes(searchLower);
                     return titleMatch || numMatch;
                   }).length === 0 && searchTerm && (
-                    <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkMutedText : colors.lightMutedText }}>
+                    <div className="text-center py-10" style={{ color: isDarkMode ? colors.darkTextSecondary : colors.lightTextSecondary }}> {/* Updated to use TextSecondary */}
                         <XCircle size={48} className="mx-auto mb-2" />
                         <p>Tsy misy ankafizina mifanaraka amin'ny sivana "{searchTerm}".</p>
                     </div>
@@ -568,7 +652,7 @@ const App = () => {
           </>
         );
       case 'about':
-        return <AboutPage isDarkMode={isDarkMode} />;
+        return <AboutPage isDarkMode={isDarkMode} onBack={() => handleNavigate('list')} />;
       default:
         return <div>Pejy tsy hita</div>;
     }
@@ -596,9 +680,17 @@ const App = () => {
           style={{ backgroundColor: headerBg, color: headerText }}
         >
           <div className="flex items-center">
+            {/* Back Button - shown if applicable */}
+            {showBackButton && (
+              <button onClick={handleHeaderBackClick} className="p-2 rounded-md mr-1">
+                <ArrowLeft size={28} />
+              </button>
+            )}
+
+            {/* Hamburger Menu - shown on small screens */}
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="p-2 rounded-md lg:hidden mr-2" // Hamburger only for small screens
+              className={`p-2 rounded-md lg:hidden ${showBackButton ? 'mr-1' : 'mr-2'}`} // Adjust margin based on back button
             >
               <Menu size={28} />
             </button>
@@ -609,7 +701,7 @@ const App = () => {
                currentPage === 'authors' ? 'Mpanoratra' :
                currentPage === 'favorites' ? 'Ankafizina' :
                currentPage === 'about' ? 'Momba ny Application' :
-               'Fihirana Malagasy '}
+               'Fihirana FFPM (static data)'} {/* Corrected title */}
             </span>
           </div>
           <button onClick={toggleSearchBar} className="p-2 rounded-md">
@@ -659,6 +751,14 @@ const App = () => {
           isDarkMode={isDarkMode}
         />
       )}
+
+      <Notification 
+        key={notification.key} // Add key here
+        message={notification.message} 
+        type={notification.type} 
+        onClose={closeNotification} 
+        isDarkMode={isDarkMode} 
+      />
     </div>
   );
 };
