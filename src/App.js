@@ -701,7 +701,7 @@ const App = () => {
                currentPage === 'authors' ? 'Mpanoratra' :
                currentPage === 'favorites' ? 'Ankafizina' :
                currentPage === 'about' ? 'Momba ny Application' :
-               'Fihirana FFPM (static data)'} {/* Corrected title */}
+               'Fihirana Malagasy'} 
             </span>
           </div>
           <button onClick={toggleSearchBar} className="p-2 rounded-md">
@@ -746,7 +746,7 @@ const App = () => {
           onClose={closeNumericInputDialog}
           onEnter={handleNumericInputEnter}
           value={numericInputValue}
-          onChange={setNumericInputValue}
+          setValue={setNumericInputValue} // Correctly pass setNumericInputValue
           onClear={handleNumericInputClear}
           isDarkMode={isDarkMode}
         />
