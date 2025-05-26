@@ -50,6 +50,12 @@ const App = () => {
   // Notification State (New)
   const [notification, setNotification] = useState({ message: '', type: 'info', key: 0 });
 
+  // Lyric Alignment State (Global)
+  const [lyricAlignment, setLyricAlignment] = useState(() => {
+    const savedAlignment = localStorage.getItem('lyricAlignment');
+    return savedAlignment ? savedAlignment : 'left'; // Default to 'left' if not saved
+  });
+
   const sidebarTitleText = useMemo(() => {
     return isDarkMode ? colors.darkSidebarTitleText : colors.lightSidebarTitleText;
   }, [isDarkMode]);
@@ -72,6 +78,11 @@ const App = () => {
     }
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
+
+  // Effect for Storing Lyric Alignment
+  useEffect(() => {
+    localStorage.setItem('lyricAlignment', lyricAlignment);
+  }, [lyricAlignment]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(prevMode => !prevMode);
@@ -190,17 +201,14 @@ const App = () => {
 
     // Service Worker
     const swContent = `
-      const CACHE_NAME = 'fihirana-pwa-static-cache-v6'; // Incremented cache version
+      const CACHE_NAME = 'fihirana-pwa-static-cache-v5'; // Incremented cache version
       const urlsToCache = [
         '/',
         '/index.html', // Main HTML file
-        '/fihirana.json', // Main data file
-        '/manifest.json', // PWA manifest
-        '/favicon.ico',   // Favicon
-        '/icons/icon-192x192.png', // Example app icon
-        '/icons/icon-512x512.png', // Example app icon
-        // JS and CSS bundles will be cached dynamically by the fetch handler
-        // Other icons and splash screens will also be cached dynamically on first use
+        // Add paths to your JS and CSS bundles if they are not inlined or handled by CRA's SW
+        // e.g., '/static/js/bundle.js', '/static/css/main.css'
+        'https://placehold.co/192x192/0077b6/ffffff?text=Fs', // Placeholder icon
+        'https://placehold.co/512x512/0077b6/ffffff?text=FihiranaS' // Placeholder icon
       ];
 
       self.addEventListener('install', event => {
@@ -208,7 +216,7 @@ const App = () => {
         event.waitUntil(
           caches.open(CACHE_NAME)
             .then(cache => {
-              console.log('Opened cache for static PWA (v6)');
+              console.log('Opened cache for static PWA (v5)');
               const validUrlsToCache = urlsToCache.filter(url => !url.startsWith('blob:'));
               return cache.addAll(validUrlsToCache);
             })
@@ -273,8 +281,8 @@ const App = () => {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register(swURL)
-          .then(registration => console.log('ServiceWorker (static data v6) registration successful with scope: ', registration.scope))
-          .catch(error => console.log('ServiceWorker (static data v6) registration failed: ', error));
+          .then(registration => console.log('ServiceWorker (static data v5) registration successful with scope: ', registration.scope))
+          .catch(error => console.log('ServiceWorker (static data v5) registration failed: ', error));
       });
     }
 
@@ -373,6 +381,11 @@ const App = () => {
   const closeNumericInputDialog = () => {
     setIsNumericInputDialogOpen(false);
     // setNumericInputValue(''); // Optionally clear input on close, or keep for re-opening
+  };
+
+  const handleSetLyricAlignment = (alignment) => {
+    setLyricAlignment(alignment);
+    showNotification(`Natao ${alignment === 'left' ? 'ankavia' : alignment === 'center' ? 'ampivoany' : 'ankavanana'} ny filaharan'ny tononkira.`, 'info');
   };
 
   const showNotification = (message, type = 'info') => {
@@ -597,12 +610,14 @@ const App = () => {
           <HymnDetail 
             hymn={selectedHymn} 
             onBack={handleBackToList} 
-            isDarkMode={isDarkMode} 
-            isFavorite={favorites.includes(selectedHymn.Id_)}
-            onToggleFavorite={() => toggleFavorite(selectedHymn.Id_)}
+            isFavorite={selectedHymn ? favorites.includes(selectedHymn.Id_) : false}
+            onToggleFavorite={toggleFavorite}
+            isDarkMode={isDarkMode}
             onSwipeNext={handleSwipeToNextHymn} // Pass handler
             onSwipePrev={handleSwipeToPrevHymn} // Pass handler
             // currentHymnIndex and totalHymns could be passed for more sophisticated UI if needed
+            lyricAlignment={lyricAlignment} // Pass state
+            onSetLyricAlignment={handleSetLyricAlignment} // Pass handler
           />
         ) : (
           <div>Mifidiana hira...</div>
@@ -698,7 +713,7 @@ const App = () => {
               <Menu size={28} />
             </button>
             
-            <span className="text-lg sm:text-xl font-semibold truncate" style={{ color: sidebarTitleText }}>
+            <span className="hidden sm:inline text-lg sm:text-xl font-semibold truncate" style={{ color: sidebarTitleText }}>
               {currentPage === 'detail' && selectedHymn ? `${selectedHymn.num}. ${selectedHymn.Titre}` : 
                currentPage === 'themes' ? 'Lohahevitra' :
                currentPage === 'authors' ? 'Mpanoratra' :
@@ -726,7 +741,7 @@ const App = () => {
         )}
 
         {/* Main Content */}
-        <main className={`flex-1 p-4 overflow-y-auto ${isSearchBarVisible ? 'pt-2' : ''}`}>
+        <main className={`flex-1 p-4 overflow-y-auto scroll-smooth ${isSearchBarVisible ? 'pt-2' : ''}`}> {/* Added scroll-smooth */}
           {isLoading && <div className="flex justify-center items-center h-full"><ListMusic className="animate-spin text-blue-500" size={48}/></div> /* Basic LoadingSpinner */}
           {error && <div className="text-red-500 text-center p-4">{error}</div> /* Basic ErrorMessage */}
           {!isLoading && !error && renderPage()}

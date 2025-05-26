@@ -28,6 +28,10 @@ const colors = {
   darkCardSubtitle: '#b0b8c9',
   darkCardMuted: '#7b8ca6',
 
+  // General Title colors (New - for use in components like HymnDetail)
+  title: '#2e3a53', // Based on cardTitle
+  darkTitle: '#fff', // Based on darkCardTitle
+
   // Card List Item specific borders (New)
   cardListItemBorder: '#e2e8f0', // Based on lightBorder
   darkCardListItemBorder: '#393a3f', // Based on darkBorder
@@ -52,6 +56,11 @@ const colors = {
   // Border colors
   darkBorder: '#393a3f',
   lightBorder: '#e2e8f0',
+
+  // Muted text colors (New - for general use, distinct from cardMuted)
+  muted: '#64748b', // Based on lightTextSecondary
+  darkMuted: '#b0b3b8', // Based on darkTextSecondary
+
   // Button styles
   buttonPrimaryBg: '#20c997',
   buttonPrimaryText: '#fff',
@@ -71,11 +80,18 @@ const colors = {
   iconRed: '#ef4444',
   iconGreen: '#22c55e',
   iconPurple: '#a78bfa',
+  iconColor: '#aaa', // Default icon color for light mode (using lightTextSecondary)
   // Dark mode icon colors
   darkIconBlue: '#3b82f6',
   darkIconRed: '#ef4444',
   darkIconGreen: '#22c55e',
   darkIconPurple: '#a78bfa',
+  darkIconColor: '#b0b3b8', // Default icon color for dark mode (using darkTextSecondary)
+
+  // Special color for Hymn Number (New)
+  hymnNumberColor: '#FFD700', // Gold color, can be adjusted to a more orange-gold if needed e.g., #FFA500 (Orange) or #FFBF00 (Amber/Orange-Gold)
+  hymnNumberColor2: '#FFA500', // Gold color, can be adjusted to a more orange-gold if needed e.g., #FFA500 (Orange) or #FFBF00 (Amber/Orange-Gold)
+
   // Sidebar specific
   // Dark Mode Sidebar
   darkSidebarBg: '#212226', // deep blue
