@@ -190,14 +190,17 @@ const App = () => {
 
     // Service Worker
     const swContent = `
-      const CACHE_NAME = 'fihirana-pwa-static-cache-v5'; // Incremented cache version
+      const CACHE_NAME = 'fihirana-pwa-static-cache-v6'; // Incremented cache version
       const urlsToCache = [
         '/',
         '/index.html', // Main HTML file
-        // Add paths to your JS and CSS bundles if they are not inlined or handled by CRA's SW
-        // e.g., '/static/js/bundle.js', '/static/css/main.css'
-        'https://placehold.co/192x192/0077b6/ffffff?text=Fs', // Placeholder icon
-        'https://placehold.co/512x512/0077b6/ffffff?text=FihiranaS' // Placeholder icon
+        '/fihirana.json', // Main data file
+        '/manifest.json', // PWA manifest
+        '/favicon.ico',   // Favicon
+        '/icons/icon-192x192.png', // Example app icon
+        '/icons/icon-512x512.png', // Example app icon
+        // JS and CSS bundles will be cached dynamically by the fetch handler
+        // Other icons and splash screens will also be cached dynamically on first use
       ];
 
       self.addEventListener('install', event => {
@@ -205,7 +208,7 @@ const App = () => {
         event.waitUntil(
           caches.open(CACHE_NAME)
             .then(cache => {
-              console.log('Opened cache for static PWA (v5)');
+              console.log('Opened cache for static PWA (v6)');
               const validUrlsToCache = urlsToCache.filter(url => !url.startsWith('blob:'));
               return cache.addAll(validUrlsToCache);
             })
@@ -270,8 +273,8 @@ const App = () => {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register(swURL)
-          .then(registration => console.log('ServiceWorker (static data v5) registration successful with scope: ', registration.scope))
-          .catch(error => console.log('ServiceWorker (static data v5) registration failed: ', error));
+          .then(registration => console.log('ServiceWorker (static data v6) registration successful with scope: ', registration.scope))
+          .catch(error => console.log('ServiceWorker (static data v6) registration failed: ', error));
       });
     }
 
