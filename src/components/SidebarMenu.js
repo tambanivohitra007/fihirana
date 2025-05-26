@@ -43,7 +43,7 @@ const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode
             <span className="text-lg font-bold tracking-tight" style={{ color: sidebarTitleText }}>Fihirana</span>
           </div>
           <div className="px-6 mb-2">
-            <span className="text-xs uppercase tracking-wider" style={{ color: sidebarText, letterSpacing: 1 }}>Navigation</span>
+            <span className="text-xs uppercase tracking-wider" style={{ color: sidebarText, letterSpacing: 1 }}>Fitetezana</span>
           </div>
           <ul className="mb-4">
             {mainNavItems.map(item => ( // Changed to mainNavItems
@@ -86,7 +86,7 @@ const SidebarMenu = ({ isOpen, onClose, onNavigate, onToggleDarkMode, isDarkMode
             ))}
           </ul>
           <div className="px-6 mb-2">
-            <span className="text-xs uppercase tracking-wider" style={{ color: sidebarText, letterSpacing: 1 }}>Other</span>
+            <span className="text-xs uppercase tracking-wider" style={{ color: sidebarText, letterSpacing: 1 }}>Ankoatra</span>
           </div>
           <ul>
             <li className="px-2">

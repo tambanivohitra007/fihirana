@@ -56,6 +56,12 @@ const App = () => {
     return savedAlignment ? savedAlignment : 'left'; // Default to 'left' if not saved
   });
 
+  // Font Size State (Global)
+  const [fontSize, setFontSize] = useState(() => {
+    const savedFontSize = localStorage.getItem('fontSize');
+    return savedFontSize ? parseInt(savedFontSize, 10) : 16; // Default to 16 if not saved
+  });
+
   const sidebarTitleText = useMemo(() => {
     return isDarkMode ? colors.darkSidebarTitleText : colors.lightSidebarTitleText;
   }, [isDarkMode]);
@@ -83,6 +89,11 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('lyricAlignment', lyricAlignment);
   }, [lyricAlignment]);
+
+  // Effect for Storing Font Size
+  useEffect(() => {
+    localStorage.setItem('fontSize', fontSize.toString());
+  }, [fontSize]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(prevMode => !prevMode);
@@ -388,6 +399,12 @@ const App = () => {
     showNotification(`Natao ${alignment === 'left' ? 'ankavia' : alignment === 'center' ? 'ampivoany' : 'ankavanana'} ny filaharan'ny tononkira.`, 'info');
   };
 
+  const handleSetFontSize = (newSize) => {
+    setFontSize(newSize);
+    // Optional: show notification for font size change
+    // showNotification(`Police modifiée : ${newSize}px`, 'info');
+  };
+
   const showNotification = (message, type = 'info') => {
     setNotification({ message, type, key: Date.now() }); // Use key to re-trigger notification even if message is same
   };
@@ -613,11 +630,13 @@ const App = () => {
             isFavorite={selectedHymn ? favorites.includes(selectedHymn.Id_) : false}
             onToggleFavorite={toggleFavorite}
             isDarkMode={isDarkMode}
-            onSwipeNext={handleSwipeToNextHymn} // Pass handler
-            onSwipePrev={handleSwipeToPrevHymn} // Pass handler
-            // currentHymnIndex and totalHymns could be passed for more sophisticated UI if needed
+            onSwipeNext={handleSwipeToNextHymn}
+            onSwipePrev={handleSwipeToPrevHymn}
+            showNotification={showNotification}
             lyricAlignment={lyricAlignment} // Pass state
             onSetLyricAlignment={handleSetLyricAlignment} // Pass handler
+            fontSize={fontSize} // Pass font size state
+            onSetFontSize={handleSetFontSize} // Pass font size handler
           />
         ) : (
           <div>Mifidiana hira...</div>
@@ -677,7 +696,10 @@ const App = () => {
   };
 
   return (
-    <div className={`flex min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}> {/* Changed flex-col to flex */}
+    <div 
+      className={`flex flex-col min-h-screen transition-colors duration-300 ease-in-out ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} no-scrollbar`}
+      style={{ background: isDarkMode ? colors.darkBg : colors.lightBg }}
+    >
       <SidebarMenu
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}

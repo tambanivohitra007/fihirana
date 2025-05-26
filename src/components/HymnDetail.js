@@ -3,14 +3,14 @@ import { Heart, Share2, ZoomIn, ZoomOut, AlignLeft, AlignCenter, AlignRight, Set
 import { useSwipeable } from 'react-swipeable';
 import colors from '../colors';
 
-const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode, onSwipeNext, onSwipePrev, showNotification, lyricAlignment, onSetLyricAlignment }) => {
-  const [fontSize, setFontSize] = useState(16);
+const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode, onSwipeNext, onSwipePrev, showNotification, lyricAlignment, onSetLyricAlignment, fontSize, onSetFontSize }) => {
+  // const [fontSize, setFontSize] = useState(16); // Removed: Now managed by App.js
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
 
   const Lieblingslied = hymn && hymn.Titel && hymn.Titel.includes("Jeso no");
 
-  const handleZoomIn = () => setFontSize(prevSize => Math.min(prevSize + 2, 48));
-  const handleZoomOut = () => setFontSize(prevSize => Math.max(prevSize - 2, 10));
+  const handleZoomIn = () => onSetFontSize(Math.min(fontSize + 2, 48)); // Use prop fontSize and onSetFontSize
+  const handleZoomOut = () => onSetFontSize(Math.max(fontSize - 2, 10)); // Use prop fontSize and onSetFontSize
 
   const toggleControlPanel = () => setIsControlPanelOpen(!isControlPanelOpen);
 
@@ -23,7 +23,7 @@ const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode, on
 
   // Reset font size, alignment, and close panel when hymn changes
   useEffect(() => {
-    setFontSize(16); 
+    // setFontSize(16); // Removed: Font size is global
     // setLyricAlignment('left'); // Removed: Alignment is global
     setIsControlPanelOpen(false); 
   }, [hymn]); 
