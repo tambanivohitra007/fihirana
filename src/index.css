@@ -26,3 +26,92 @@ code {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Slide-in/out animations for hymn transitions */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.slide-in-from-right {
+  animation: slideInFromRight 0.3s ease-out forwards;
+  position: absolute; /* Added for smooth transition */
+  width: 100%; /* Added for smooth transition */
+  top: 0; /* Added for smooth transition */
+  left: 0; /* Added for smooth transition */
+}
+
+.slide-in-from-left {
+  animation: slideInFromLeft 0.3s ease-out forwards;
+  position: absolute; /* Added for smooth transition */
+  width: 100%; /* Added for smooth transition */
+  top: 0; /* Added for smooth transition */
+  left: 0; /* Added for smooth transition */
+}
+
+.slide-out-to-left {
+  animation: slideOutToLeft 0.3s ease-out forwards;
+  position: absolute; /* Added for smooth transition */
+  width: 100%; /* Added for smooth transition */
+  top: 0; /* Added for smooth transition */
+  left: 0; /* Added for smooth transition */
+}
+
+.slide-out-to-right {
+  animation: slideOutToRight 0.3s ease-out forwards;
+  position: absolute; /* Added for smooth transition */
+  width: 100%; /* Added for smooth transition */
+  top: 0; /* Added for smooth transition */
+  left: 0; /* Added for smooth transition */
+}
+
+/* Add a container to ensure overflow is hidden during transition */
+.hymn-detail-container {
+  overflow-x: hidden;
+  position: relative; /* Needed for absolute positioning of children */
+  min-height: 400px; /* Or a height that suits your content, to prevent collapse */
+}
+
+/* Optional: Style for the individual hymn detail content if needed */
+.hymn-detail-content {
+  /* Styles for individual hymn content if they are not absolutely positioned by animation classes */
+}

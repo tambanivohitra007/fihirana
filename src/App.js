@@ -27,6 +27,8 @@ const App = () => {
 
   // State for navigation and selected hymn
   const [selectedHymn, setSelectedHymn] = useState(null);
+  const [previousHymn, setPreviousHymn] = useState(null); // To hold the outgoing hymn
+  const [swipeDirection, setSwipeDirection] = useState(null); // 'left', 'right', or null
   const [currentPage, setCurrentPage] = useState('list'); 
 
   // PWA specific states
@@ -50,16 +52,13 @@ const App = () => {
   // Notification State (New)
   const [notification, setNotification] = useState({ message: '', type: 'info', key: 0 });
 
-  // Lyric Alignment State (Global)
+  // Lyric alignment and font size state
   const [lyricAlignment, setLyricAlignment] = useState(() => {
-    const savedAlignment = localStorage.getItem('lyricAlignment');
-    return savedAlignment ? savedAlignment : 'left'; // Default to 'left' if not saved
+    return localStorage.getItem('lyricAlignment') || 'left';
   });
-
-  // Font Size State (Global)
   const [fontSize, setFontSize] = useState(() => {
-    const savedFontSize = localStorage.getItem('fontSize');
-    return savedFontSize ? parseInt(savedFontSize, 10) : 16; // Default to 16 if not saved
+    const savedSize = localStorage.getItem('fontSize');
+    return savedSize ? parseInt(savedSize, 10) : 16; // Default to 16px
   });
 
   const sidebarTitleText = useMemo(() => {
@@ -84,16 +83,6 @@ const App = () => {
     }
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
-
-  // Effect for Storing Lyric Alignment
-  useEffect(() => {
-    localStorage.setItem('lyricAlignment', lyricAlignment);
-  }, [lyricAlignment]);
-
-  // Effect for Storing Font Size
-  useEffect(() => {
-    localStorage.setItem('fontSize', fontSize.toString());
-  }, [fontSize]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(prevMode => !prevMode);
@@ -394,17 +383,6 @@ const App = () => {
     // setNumericInputValue(''); // Optionally clear input on close, or keep for re-opening
   };
 
-  const handleSetLyricAlignment = (alignment) => {
-    setLyricAlignment(alignment);
-    showNotification(`Natao ${alignment === 'left' ? 'ankavia' : alignment === 'center' ? 'ampivoany' : 'ankavanana'} ny filaharan'ny tononkira.`, 'info');
-  };
-
-  const handleSetFontSize = (newSize) => {
-    setFontSize(newSize);
-    // Optional: show notification for font size change
-    // showNotification(`Police modifiée : ${newSize}px`, 'info');
-  };
-
   const showNotification = (message, type = 'info') => {
     setNotification({ message, type, key: Date.now() }); // Use key to re-trigger notification even if message is same
   };
@@ -449,36 +427,42 @@ const App = () => {
 
   // Navigation and Selection Handlers
   const handleSelectHymn = useCallback((hymn) => {
-    console.log("[App.js] handleSelectHymn called. Hymn data:", hymn); // Log 1: Check if function is called and with what data
-    if (hymn && typeof hymn === 'object' && hymn.Id_ !== undefined) { // Basic check for a valid hymn object
-        setPreviousPageForDetail(currentPage); // Capture current page before navigating to detail
+    console.log("[App.js] handleSelectHymn called. Hymn data:", hymn);
+    if (hymn && typeof hymn === 'object' && hymn.Id_ !== undefined) {
+        setPreviousPageForDetail(currentPage);
         setSelectedHymn(hymn);
+        setPreviousHymn(null); // Clear previous hymn when selecting a new one directly
+        setSwipeDirection(null); // Clear swipe direction
         setCurrentPage('detail');
-        console.log("[App.js] State updated: selectedHymn set, currentPage set to 'detail'. Hymn ID:", hymn.Id_); // Log 2: Confirm state setters are called
+        console.log("[App.js] State updated: selectedHymn set, currentPage set to 'detail'. Hymn ID:", hymn.Id_);
     } else {
-        console.error("[App.js] handleSelectHymn called with invalid or null hymn data:", hymn); // Log 3: Error if hymn data is bad
-        // Prevent further execution if hymn data is invalid to avoid errors
+        console.error("[App.js] handleSelectHymn called with invalid or null hymn data:", hymn);
         return;
     }
     setIsSidebarOpen(false);
     window.scrollTo(0, 0);
-  }, [currentPage, setSelectedHymn, setCurrentPage, setIsSidebarOpen, setPreviousPageForDetail]); // Added dependencies
+  }, [currentPage, setSelectedHymn, setPreviousHymn, setSwipeDirection, setCurrentPage, setIsSidebarOpen, setPreviousPageForDetail]);
 
   const handleSwipeToNextHymn = useCallback(() => {
     if (!selectedHymn || filteredHymns.length <= 1) return;
     const currentIndex = filteredHymns.findIndex(h => h.Id_ === selectedHymn.Id_);
-    if (currentIndex === -1) return; // Should not happen if selectedHymn is from filteredHymns
+    if (currentIndex === -1) return;
 
     const nextIndex = (currentIndex + 1) % filteredHymns.length;
     const nextHymn = filteredHymns[nextIndex];
     if (nextHymn) {
-      // Don't change previousPageForDetail here, as we are still in a "detail-like" view sequence
+      setSwipeDirection('right');
+      setPreviousHymn(selectedHymn);
       setSelectedHymn(nextHymn);
-      // setCurrentPage('detail'); // Already on detail page
+      // Don't change previousPageForDetail here
       window.scrollTo(0, 0);
       showNotification(`Hira Manaraka: ${nextHymn.num}. ${nextHymn.Titre}`, 'info');
+      setTimeout(() => {
+        setPreviousHymn(null);
+        setSwipeDirection(null);
+      }, 300); // Duration of the animation
     }
-  }, [selectedHymn, filteredHymns, setSelectedHymn, showNotification]);
+  }, [selectedHymn, filteredHymns, setSelectedHymn, setPreviousHymn, setSwipeDirection, showNotification]);
 
   const handleSwipeToPrevHymn = useCallback(() => {
     if (!selectedHymn || filteredHymns.length <= 1) return;
@@ -488,20 +472,25 @@ const App = () => {
     const prevIndex = (currentIndex - 1 + filteredHymns.length) % filteredHymns.length;
     const prevHymn = filteredHymns[prevIndex];
     if (prevHymn) {
+      setSwipeDirection('left');
+      setPreviousHymn(selectedHymn);
       setSelectedHymn(prevHymn);
       window.scrollTo(0, 0);
       showNotification(`Hira Teo Aloha: ${prevHymn.num}. ${prevHymn.Titre}`, 'info');
+      setTimeout(() => {
+        setPreviousHymn(null);
+        setSwipeDirection(null);
+      }, 300); // Duration of the animation
     }
-  }, [selectedHymn, filteredHymns, setSelectedHymn, showNotification]);
+  }, [selectedHymn, filteredHymns, setSelectedHymn, setPreviousHymn, setSwipeDirection, showNotification]);
 
 
   const handleBackToList = useCallback(() => {
     setSelectedHymn(null);
-    // Navigate back to the page stored in previousPageForDetail
+    setPreviousHymn(null); // Clear previous hymn when going back
+    setSwipeDirection(null); // Clear swipe direction
     setCurrentPage(previousPageForDetail);
-    // Filters and search term will naturally be preserved if previousPageForDetail was 'list'
-    // and they were active then.
-  }, [previousPageForDetail, setCurrentPage, setSelectedHymn]);
+  }, [previousPageForDetail, setCurrentPage, setSelectedHymn, setPreviousHymn, setSwipeDirection]);
 
   const handleNavigate = (page) => {
     setCurrentPage(page);
@@ -623,23 +612,52 @@ const App = () => {
           </>
         );
       case 'detail':
-        return selectedHymn ? (
-          <HymnDetail 
-            hymn={selectedHymn} 
-            onBack={handleBackToList} 
-            isFavorite={selectedHymn ? favorites.includes(selectedHymn.Id_) : false}
-            onToggleFavorite={toggleFavorite}
-            isDarkMode={isDarkMode}
-            onSwipeNext={handleSwipeToNextHymn}
-            onSwipePrev={handleSwipeToPrevHymn}
-            showNotification={showNotification}
-            lyricAlignment={lyricAlignment} // Pass state
-            onSetLyricAlignment={handleSetLyricAlignment} // Pass handler
-            fontSize={fontSize} // Pass font size state
-            onSetFontSize={handleSetFontSize} // Pass font size handler
-          />
-        ) : (
-          <div>Mifidiana hira...</div>
+        // Container for managing hymn transitions
+        return (
+          <div className="hymn-detail-container">
+            {previousHymn && swipeDirection && (
+              <HymnDetail
+                key={previousHymn.Id_} // Important for React to treat it as a distinct element
+                hymn={previousHymn}
+                onBack={handleBackToList}
+                isDarkMode={isDarkMode}
+                isFavorite={favorites.includes(previousHymn.Id_)}
+                onToggleFavorite={() => toggleFavorite(previousHymn.Id_)}
+                onSwipeNext={handleSwipeToNextHymn}
+                onSwipePrev={handleSwipeToPrevHymn}
+                lyricAlignment={lyricAlignment}
+                onSetLyricAlignment={setLyricAlignment}
+                fontSize={fontSize}
+                onSetFontSize={setFontSize}
+                swipeAnimationClass={swipeDirection === 'right' ? 'slide-out-to-left' : 'slide-out-to-right'}
+                showNotification={showNotification}
+              />
+            )}
+            {selectedHymn && (
+              <HymnDetail
+                key={selectedHymn.Id_} // Important for React to treat it as a distinct element
+                hymn={selectedHymn}
+                onBack={handleBackToList}
+                isDarkMode={isDarkMode}
+                isFavorite={favorites.includes(selectedHymn.Id_)}
+                onToggleFavorite={() => toggleFavorite(selectedHymn.Id_)}
+                onSwipeNext={handleSwipeToNextHymn}
+                onSwipePrev={handleSwipeToPrevHymn}
+                lyricAlignment={lyricAlignment}
+                onSetLyricAlignment={setLyricAlignment}
+                fontSize={fontSize}
+                onSetFontSize={setFontSize}
+                swipeAnimationClass={
+                  swipeDirection === 'right' ? 'slide-in-from-right' :
+                  swipeDirection === 'left' ? 'slide-in-from-left' : ''
+                }
+                showNotification={showNotification}
+              />
+            )}
+            {!selectedHymn && !previousHymn && (
+                 <div>Mifidiana hira...</div>
+            )}
+          </div>
         );
       case 'themes':
         return <SelectionListPage title="Lohahevitra" items={uniqueThemes} onSelect={handleThemeSelect} isDarkMode={isDarkMode} onBack={() => handleNavigate('list')} />;
@@ -696,10 +714,7 @@ const App = () => {
   };
 
   return (
-    <div 
-      className={`flex flex-col min-h-screen transition-colors duration-300 ease-in-out ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} no-scrollbar`}
-      style={{ background: isDarkMode ? colors.darkBg : colors.lightBg }}
-    >
+    <div className={`flex min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}> {/* Changed flex-col to flex */}
       <SidebarMenu
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
