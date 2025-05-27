@@ -5,6 +5,10 @@ const colors = {
   // Backgrounds
   darkBg: '#212226',
   lightBg: '#ffffff',
+
+
+  songHeaderBg: 'radial-gradient(circle, rgba(254, 188, 6, 0.17), rgba(61, 255, 110, 0))', // light background for song header
+  songHeaderLighBg: 'radial-gradient(circle, rgba(167, 254, 6, 0), rgba(255, 148, 61, 0.1))', // light background for song header
   // Gradients
   darkGradient: '#212226',
   lightGradient: 'linear-gradient(90deg, #028174 70%, #028180 100%)',

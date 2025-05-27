@@ -61,6 +61,16 @@ const App = () => {
     return savedSize ? parseInt(savedSize, 10) : 16; // Default to 16px
   });
 
+  // Effect to store lyric alignment
+  useEffect(() => {
+    localStorage.setItem('lyricAlignment', lyricAlignment);
+  }, [lyricAlignment]);
+
+  // Effect to store font size
+  useEffect(() => {
+    localStorage.setItem('fontSize', fontSize.toString());
+  }, [fontSize]);
+
   const sidebarTitleText = useMemo(() => {
     return isDarkMode ? colors.darkSidebarTitleText : colors.lightSidebarTitleText;
   }, [isDarkMode]);

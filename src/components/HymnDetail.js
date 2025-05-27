@@ -3,6 +3,20 @@ import { Heart, Share2, ZoomIn, ZoomOut, AlignLeft, AlignCenter, AlignRight, Set
 import { useSwipeable } from 'react-swipeable';
 import colors from '../colors';
 
+// Define helper for SVG clip path
+const SvgClipPathDefs = () => (
+  <svg width="0" height="0" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}> {/* Ensure it's not taking up space or visible */}
+    <defs>
+      <clipPath id="hymnHeaderRippleClip" clipPathUnits="objectBoundingBox">
+        {/* Path: rounded top corners (approx 0.03 relative radius), wavy bottom with two ripples */}
+        {/* M0,R C0,Rk Rk,0 R,0 H(1-R) C(1-Rk),0 1,Rk 1,R V0.85 Q0.75,1 0.5,0.85 T0,0.85 V R Z */}
+        {/* R=0.03, Rk (control point offset from R along axis) = 0.013431457506 */}
+        <path d="M0,0.03 C0,0.013431457506 0.013431457506,0 0.03,0 H0.97 C0.983431457506,0 1,0.013431457506 1,0.03 V0.85 Q0.75,0.925 0.5,0.85 T0,0.85 V0.03 Z" />
+      </clipPath>
+    </defs>
+  </svg>
+);
+
 const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode, onSwipeNext, onSwipePrev, showNotification, lyricAlignment, onSetLyricAlignment, fontSize, onSetFontSize, swipeAnimationClass, onToggleHeaderVisibility }) => {
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false); // Added isFullScreen state
@@ -30,7 +44,7 @@ const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode, on
       // A more robust way would be to use refs to the elements
       if (isControlPanelOpen && 
           !event.target.closest('.fixed.bottom-32.right-4') && // Control panel selector
-          !event.target.closest('.fixed.bottom-16.right-4 button')) { // Toggle button selector
+          !event.target.closest('.fixed.bottom-10.right-6 button')) { // Corrected Toggle button selector
         setIsControlPanelOpen(false);
       }
     };
@@ -270,187 +284,206 @@ const HymnDetail = ({ hymn, onBack, isFavorite, onToggleFavorite, isDarkMode, on
   }
 
   return (
-    <div
-      {...swipeHandlers}
-      className={`hymn-detail-content max-w-2xl mx-auto p-4 md:p-6 rounded-xl select-none ${swipeAnimationClass || ''}`}
-      style={{
-        background: isDarkMode ? colors.darkCard : colors.cardBg,
-        boxShadow: isDarkMode ? colors.darkCardShadow : colors.cardShadow,
-        border: `1px solid ${isDarkMode ? colors.darkCardBorder : colors.cardBorder}`,
-        touchAction: 'pan-y' // Keep pan-y for vertical scrolling of content
-      }}>
-      <div className="flex justify-between items-start mb-4">
-        {/* Left side: Favorite and Share buttons */}
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => onToggleFavorite(hymn.Id_)}
-            className={`p-2 rounded-full transition-colors ${isFavorite ? 'text-red-500 bg-red-100 dark:text-red-400 dark:bg-red-900' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-            style={!isFavorite ? { color: isDarkMode ? colors.darkIconColor : colors.iconColor } : {}}
-            aria-label={isFavorite ? "Esory amin\\'ny ankafizina" : "Ampio amin\\'ny ankafizina"}
-          >
-            <Heart size={24} fill={isFavorite ? 'currentColor' : 'none'} />
-          </button>
-
-          <button
-            onClick={handleShare}
-            className="p-2 rounded-full transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
-            style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
-            aria-label="Partager ce cantique"
-          >
-            <Share2 size={24} />
-          </button>
-        </div>
-
-        {/* Right side: Hymn Number (Large) */}
-        <div className="text-right"> 
-          <h2 className="text-5xl font-bold" style={{ color: isDarkMode ? colors.hymnNumberColor : colors.hymnNumberColor2 }}>
-            {hymn.num}
-          </h2>
-        </div>
-      </div>
-
-      <h1 className="text-2xl font-bold mb-1 text-center" style={{ color: isDarkMode ? colors.darkTitle : colors.title }}>
-        {hymn.Titre}
-      </h1>
-      {Lieblingslied && (
-          <p className="text-sm text-center mb-3" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
-              (Ein Lieblingslied von Jeso)
-          </p>
-      )}
-      {/* Display Auteur */}
-      {hymn.Auteur && (
-        <p className="text-sm text-center mb-1" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
-          Auteur: {hymn.Auteur}
-        </p>
-      )}
-      {hymn.Compositeur && (
-        <p className="text-sm text-center mb-1" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
-          Compositeur: {hymn.Compositeur}
-        </p>
-      )}
-      {hymn.Tonalite && (
-        <p className="text-sm text-center mb-1" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
-          Tonalité: {hymn.Tonalite}
-        </p>
-      )}
-      {hymn.Theme1 && (
-        <p className="text-sm text-center mb-3" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}> {/* mb-3 for last item in block */}
-          Thème: {hymn.Theme1}
-        </p>
-      )}
-
+    <> {/* Use a fragment to include SvgClipPathDefs */}
+      <SvgClipPathDefs />
       <div
-        className={`text-base whitespace-pre-line mt-4 break-words ${lyricAlignment === 'left' ? 'text-left' : lyricAlignment === 'center' ? 'text-center' : 'text-right'}`}
+        {...swipeHandlers}
+        className={`hymn-detail-content max-w-2xl mx-auto p-4 md:p-6 rounded-xl select-none ${swipeAnimationClass || ''}`}
         style={{
-          fontSize: `${fontSize}px`,
-          color: isDarkMode ? colors.darkText : colors.text,
-          lineHeight: '1.8'
-        }}
-      >
-        {formatDetails(hymn.detaille)}
-      </div>
+          background: isDarkMode ? colors.darkCard : colors.cardBg,
+          boxShadow: isDarkMode ? colors.darkCardShadow : colors.cardShadow,
+          border: `1px solid ${isDarkMode ? colors.darkCardBorder : colors.cardBorder}`,
+          touchAction: 'pan-y' // Keep pan-y for vertical scrolling of content
+        }}>
 
-      <div className="fixed bottom-16 right-4 z-50">
-        <button
-          onClick={toggleControlPanel}
-          className="p-4 rounded-full shadow-lg transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
-          style={{
-            backgroundColor: isDarkMode ? colors.darkAccent : colors.accent,
-            color: isDarkMode ? colors.darkButtonText : colors.buttonText,
-            borderColor: isDarkMode ? colors.darkAccentBorder : colors.accentBorder
-          }}
-          aria-label={isControlPanelOpen ? "Fermer les contrôles" : "Ouvrir les contrôles"}
-        >
-          {isControlPanelOpen ? <X size={24} /> : <Settings size={24} />}
-        </button>
-      </div>
-
-      {isControlPanelOpen && (
+        {/* New Header Background Section */}
         <div
-          className={`fixed bottom-32 right-4 z-40 p-3 rounded-lg shadow-xl transition-all duration-300 ease-in-out transform ${
-            isControlPanelOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
+          className="-mx-4 -mt-4 md:-mx-6 md:-mt-6 px-4 pt-4 pb-16 md:px-6 md:pt-6 md:pb-16 mb-4" // Changed pb-10 md:pb-12 to pb-16 md:pb-16
           style={{
-            background: isDarkMode ? colors.darkCard : colors.cardBg,
-            border: `1px solid ${isDarkMode ? colors.darkCardBorder : colors.cardBorder}`
+            background: isDarkMode
+              ? colors.songHeaderBg // Assuming this is a gradient or a suitable dark color
+              : colors.songHeaderLighBg, // Assuming this is a gradient or a suitable light color
+            // borderBottomLeftRadius: '2rem', // Removed
+            // borderBottomRightRadius: '2rem', // Removed
+            clipPath: 'url(#hymnHeaderRippleClip)', // Added clip-path
           }}
         >
-          <div className="flex items-center justify-around space-x-2 mb-2">
-            <button
-              onClick={handleZoomOut}
-              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-              style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
-              aria-label="Zoom arrière"
-            >
-              <ZoomOut size={22}/>
-            </button>
-            <span className="text-sm w-10 text-center" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>{fontSize}px</span>
-            <button
-              onClick={handleZoomIn}
-              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-              style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
-              aria-label="Zoom avant"
-            >
-              <ZoomIn size={22}/>
-            </button>
-          </div>
-          <div className="flex items-center justify-around space-x-2 border-t pt-2" style={{ borderColor: isDarkMode ? colors.darkBorder : colors.border }}>
-            <button
-              onClick={() => handleAlignment('left')}
-              className={`p-2 rounded-full ${lyricAlignment === 'left' ? (isDarkMode ? 'bg-gray-700' : 'bg-gray-300') : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-              style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
-              aria-label="Aligner à gauche"
-            >
-              <AlignLeft size={20}/>
-            </button>
-            <button
-              onClick={() => handleAlignment('center')}
-              className={`p-2 rounded-full ${lyricAlignment === 'center' ? (isDarkMode ? 'bg-gray-700' : 'bg-gray-300') : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-              style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
-              aria-label="Aligner au centre"
-            >
-              <AlignCenter size={20}/>
-            </button>
-            <button
-              onClick={() => handleAlignment('right')}
-              className={`p-2 rounded-full ${lyricAlignment === 'right' ? (isDarkMode ? 'bg-gray-700' : 'bg-gray-300') : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-              style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
-              aria-label="Aligner à droite"
-            >
-              <AlignRight size={20}/>
-            </button>
-          </div>
-          {/* Fullscreen Toggle Button */}
-          <div className="border-t pt-2 mt-2" style={{ borderColor: isDarkMode ? colors.darkBorder : colors.border }}>
-            <button
-              onClick={handleToggleFullScreen}
-              className="w-full flex items-center justify-center p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
-              aria-label={isFullScreen ? "Quitter le mode plein écran" : "Passer en mode plein écran"}
-            >
-              {isFullScreen ? <Minimize size={20} /> : <Maximize size={20} />}
-              <span className="ml-2 text-sm" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
-                {isFullScreen ? "Normal" : "Plein Écran"}
-              </span>
-            </button>
-          </div>
-        </div>
-      )}
+          <div className="flex justify-between items-start"> 
+            {/* Left side: Favorite and Share buttons */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onToggleFavorite(hymn.Id_)}
+                className={`p-2 rounded-full transition-colors ${isFavorite ? 'text-red-500 bg-red-100 dark:text-red-400 dark:bg-red-900' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                style={!isFavorite ? { color: isDarkMode ? colors.darkIconColor : colors.iconColor } : {}}
+                aria-label={isFavorite ? "Esory amin\\'ny ankafizina" : "Ampio amin\\'ny ankafizina"}
+              >
+                <Heart size={24} fill={isFavorite ? 'currentColor' : 'none'} />
+              </button>
 
-      <div className="mt-6 text-center">
-        <button
-            onClick={onBack}
-            className="px-6 py-2 rounded-lg transition-colors"
-            style={{
-                backgroundColor: isDarkMode ? colors.hymnNumberColor : colors.hymnNumberColor2,
-                color: isDarkMode ? colors.lightText : colors.darkText,
-                border: `1px solid ${isDarkMode ? colors.darkButtonBorder : colors.buttonBorder}`
-            }}
+              <button
+                onClick={handleShare}
+                className="p-2 rounded-full transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+                style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+                aria-label="Partager ce cantique"
+              >
+                <Share2 size={24} />
+              </button>
+            </div>
+
+            {/* Right side: Hymn Number (Large) */}
+            <div className="text-right">
+              <h2 className="text-5xl font-bold" style={{ color: isDarkMode ? colors.hymnNumberColor : colors.hymnNumberColor2 }}>
+                {hymn.num}
+              </h2>
+            </div>
+          </div>
+
+          <h1 className="text-2xl font-bold mt-3 text-center" style={{ color: isDarkMode ? colors.darkTitle : colors.title }}>
+            {hymn.Titre}
+          </h1>
+          {Lieblingslied && (
+              <p className="text-sm text-center mt-1" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
+                  (Ein Lieblingslied von Jeso)
+              </p>
+          )}
+          
+          {/* Moved Auteur, Compositeur, Tonalite, Theme1 inside this div */}
+          {hymn.Auteur && (
+            <p className="text-sm text-center mt-2" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
+              Auteur: {hymn.Auteur}
+            </p>
+          )}
+          {hymn.Compositeur && (
+            <p className="text-sm text-center mt-1" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
+              Compositeur: {hymn.Compositeur}
+            </p>
+          )}
+          {hymn.Tonalite && (
+            <p className="text-sm text-center mt-1" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
+              Tonalité: {hymn.Tonalite}
+            </p>
+          )}
+          {hymn.Theme1 && (
+            <p className="text-sm text-center mt-1" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}> {/* mb-3 removed, will be handled by parent's mb-4 */}
+              Thème: {hymn.Theme1}
+            </p>
+          )}
+        </div>
+        {/* End of New Header Background Section */}
+
+        <div
+          className={`text-base whitespace-pre-line break-words ${lyricAlignment === 'left' ? 'text-left' : lyricAlignment === 'center' ? 'text-center' : 'text-right'}`} // mt-4 removed
+          style={{
+            fontSize: `${fontSize}px`,
+            color: isDarkMode ? colors.darkText : colors.text,
+            lineHeight: '1.8'
+          }}
         >
-            Hiverina
-        </button>
+          {formatDetails(hymn.detaille)}
+        </div>
+
+        <div className="fixed bottom-10 right-6 z-50">
+          <button
+            onClick={toggleControlPanel}
+            className="p-4 rounded-full shadow-lg transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            style={{
+              backgroundColor: isDarkMode ? colors.darkAccent : colors.accent,
+              color: isDarkMode ? colors.darkButtonText : colors.buttonText,
+              borderColor: isDarkMode ? colors.darkAccentBorder : colors.accentBorder
+            }}
+            aria-label={isControlPanelOpen ? "Fermer les contrôles" : "Ouvrir les contrôles"}
+          >
+            {isControlPanelOpen ? <X size={24} /> : <Settings size={24} />}
+          </button>
+        </div>
+
+        {isControlPanelOpen && (
+          <div
+            className={`fixed bottom-32 right-4 z-40 p-3 rounded-lg shadow-xl transition-all duration-300 ease-in-out transform ${
+              isControlPanelOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+            style={{
+              background: isDarkMode ? colors.darkCard : colors.cardBg,
+              border: `1px solid ${isDarkMode ? colors.darkCardBorder : colors.cardBorder}`
+            }}
+          >
+            <div className="flex items-center justify-around space-x-2 mb-2">
+              <button
+                onClick={handleZoomOut}
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+                aria-label="Zoom arrière"
+              >
+                <ZoomOut size={22}/>
+              </button>
+              <span className="text-sm w-10 text-center" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>{fontSize}px</span>
+              <button
+                onClick={handleZoomIn}
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+                aria-label="Zoom avant"
+              >
+                <ZoomIn size={22}/>
+              </button>
+            </div>
+            <div className="flex items-center justify-around space-x-2 border-t pt-2" style={{ borderColor: isDarkMode ? colors.darkBorder : colors.border }}>
+              <button
+                onClick={() => handleAlignment('left')}
+                className={`p-2 rounded-full ${lyricAlignment === 'left' ? (isDarkMode ? 'bg-gray-700' : 'bg-gray-300') : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+                aria-label="Aligner à gauche"
+              >
+                <AlignLeft size={20}/>
+              </button>
+              <button
+                onClick={() => handleAlignment('center')}
+                className={`p-2 rounded-full ${lyricAlignment === 'center' ? (isDarkMode ? 'bg-gray-700' : 'bg-gray-300') : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+                aria-label="Aligner au centre"
+              >
+                <AlignCenter size={20}/>
+              </button>
+              <button
+                onClick={() => handleAlignment('right')}
+                className={`p-2 rounded-full ${lyricAlignment === 'right' ? (isDarkMode ? 'bg-gray-700' : 'bg-gray-300') : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+                aria-label="Aligner à droite"
+              >
+                <AlignRight size={20}/>
+              </button>
+            </div>
+            {/* Fullscreen Toggle Button */}
+            <div className="border-t pt-2 mt-2" style={{ borderColor: isDarkMode ? colors.darkBorder : colors.border }}>
+              <button
+                onClick={handleToggleFullScreen}
+                className="w-full flex items-center justify-center p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                style={{ color: isDarkMode ? colors.darkIconColor : colors.iconColor }}
+                aria-label={isFullScreen ? "Quitter le mode plein écran" : "Passer en mode plein écran"}
+              >
+                {isFullScreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                <span className="ml-2 text-sm" style={{ color: isDarkMode ? colors.darkMuted : colors.muted }}>
+                  {isFullScreen ? "Normal" : "Plein Écran"}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6 text-center">
+          <button
+              onClick={onBack}
+              className="px-6 py-2 rounded-lg transition-colors"
+              style={{
+                  backgroundColor: isDarkMode ? colors.hymnNumberColor : colors.hymnNumberColor2,
+                  color: isDarkMode ? colors.lightText : colors.darkText,
+                  border: `1px solid ${isDarkMode ? colors.darkButtonBorder : colors.buttonBorder}`
+              }}
+          >
+              Hiverina
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
